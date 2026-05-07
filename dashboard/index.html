@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>RecoverAI — Agent Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      font-family: 'Outfit', sans-serif;
+    }
+    body {
+      background-color: #0b0c10;
+      background-image: 
+        radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
+        radial-gradient(at 50% 0%, hsla(225,39%,30%,0.1) 0, transparent 50%), 
+        radial-gradient(at 100% 0%, hsla(339,49%,30%,0.1) 0, transparent 50%);
+      background-attachment: fixed;
+      color: #e2e8f0;
+      min-height: 100vh;
+    }
+    
+    /* Glassmorphism Cards */
+    .glass-card {
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+    .glass-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(255, 255, 255, 0.1);
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Gradients */
+    .text-gradient {
+      background: linear-gradient(135deg, #a8c0ff 0%, #3f2b96 100%);
+      background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .accent-bg {
+      background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
+    }
+
+    /* Animations */
+    @keyframes float {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-5px); }
+      100% { transform: translateY(0px); }
+    }
+    @keyframes pulse-glow {
+      0%, 100% { box-shadow: 0 0 10px rgba(79, 172, 254, 0.4); }
+      50% { box-shadow: 0 0 20px rgba(79, 172, 254, 0.8); }
+    }
+    .live-dot {
+      animation: pulse-glow 2s infinite;
+    }
+    
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+
+    .reasoning-log-item {
+      border-left: 2px solid #4facfe;
+      background: rgba(79, 172, 254, 0.05);
+      transition: all 0.3s ease;
+    }
+    .reasoning-log-item:hover {
+      background: rgba(79, 172, 254, 0.1);
+    }
+  </style>
+</head>
+<body class="p-4 md:p-8">
+
+  <div class="max-w-7xl mx-auto space-y-8">
+    <!-- Header -->
+    <header class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 glass-card rounded-2xl p-6">
+      <div>
+        <h1 class="text-4xl font-bold tracking-tight text-gradient mb-1">RecoverAI</h1>
+        <p class="text-slate-400 font-light">Autonomous Agentic Checkout Recovery</p>
+      </div>
+      <div class="flex items-center gap-3 bg-slate-900/50 px-4 py-2 rounded-full border border-slate-700/50">
+        <div class="w-2.5 h-2.5 rounded-full bg-blue-400 live-dot"></div>
+        <span class="text-blue-300 text-sm font-medium tracking-wide">Agent Listening</span>
+      </div>
+    </header>
+
+    <!-- Stats Row -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+      <div class="glass-card rounded-2xl p-6">
+        <p class="text-slate-400 text-sm font-medium mb-2 uppercase tracking-wider">Carts Abandoned</p>
+        <p class="text-4xl font-bold text-white" id="total-carts">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6">
+        <p class="text-slate-400 text-sm font-medium mb-2 uppercase tracking-wider">Recovery Attempts</p>
+        <p class="text-4xl font-bold text-white" id="total-attempts">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 relative overflow-hidden group">
+        <div class="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+        <p class="text-slate-400 text-sm font-medium mb-2 uppercase tracking-wider relative z-10">Converted</p>
+        <p class="text-4xl font-bold text-gradient relative z-10" id="total-converted">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 relative overflow-hidden group">
+        <div class="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+        <p class="text-slate-400 text-sm font-medium mb-2 uppercase tracking-wider relative z-10">Recovery Rate</p>
+        <p class="text-4xl font-bold text-gradient relative z-10" id="recovery-rate">—</p>
+      </div>
+    </div>
+
+    <!-- Main Content Grid -->
+    <div class="grid lg:grid-cols-3 gap-6">
+      
+      <!-- Chart Area -->
+      <div class="lg:col-span-2 glass-card rounded-2xl p-6">
+        <div class="flex justify-between items-center mb-6">
+          <h2 class="text-lg font-semibold text-slate-200">Conversion by Strategy</h2>
+        </div>
+        <div class="h-[300px] w-full relative">
+          <canvas id="conversionChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Live Agent Reasoning -->
+      <div class="glass-card rounded-2xl p-6 flex flex-col h-full">
+        <div class="flex items-center gap-2 mb-6">
+          <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+          <h2 class="text-lg font-semibold text-slate-200">Live Agent Reasoning</h2>
+        </div>
+        
+        <div id="reasoning-log" class="flex-1 space-y-3 overflow-y-auto pr-2 max-h-[300px]">
+          <div class="text-slate-500 text-sm italic text-center mt-10">Waiting for agent activity...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Demo Simulator & Table Grid -->
+    <div class="grid lg:grid-cols-3 gap-6">
+      
+      <!-- Simulator -->
+      <div class="lg:col-span-1 glass-card rounded-2xl p-6 border-blue-500/20 shadow-[0_0_30px_rgba(59,130,246,0.1)]">
+        <h2 class="text-lg font-semibold text-slate-200 mb-2">Simulate Abandonment</h2>
+        <p class="text-slate-400 text-sm mb-6">Trigger a dummy webhook for the judges.</p>
+        
+        <div class="space-y-4">
+          <div>
+            <label class="block text-xs font-medium text-slate-400 mb-1 uppercase">Cart Value (₹)</label>
+            <input id="sim-value" type="number" placeholder="e.g. 4500" class="w-full bg-black/20 border border-slate-700/50 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all text-white placeholder-slate-600" />
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-400 mb-1 uppercase">Customer Type</label>
+            <select id="sim-type" class="w-full bg-black/20 border border-slate-700/50 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all text-white appearance-none">
+              <option value="new" class="bg-slate-900">New Customer</option>
+              <option value="returning" class="bg-slate-900">Returning Customer</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-400 mb-1 uppercase">Product Category Hint</label>
+            <input id="sim-product" type="text" placeholder="e.g. Running Shoes" class="w-full bg-black/20 border border-slate-700/50 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all text-white placeholder-slate-600" />
+          </div>
+          <button onclick="simulateCart()" class="w-full accent-bg hover:opacity-90 text-white font-semibold rounded-xl px-4 py-3 text-sm transition-all transform hover:scale-[1.02] shadow-lg shadow-blue-500/25 flex justify-center items-center gap-2">
+            Trigger Agent 
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+          </button>
+          <p id="sim-result" class="text-blue-400 text-xs font-medium text-center h-4"></p>
+        </div>
+      </div>
+
+      <!-- Recent Table -->
+      <div class="lg:col-span-2 glass-card rounded-2xl p-6">
+        <h2 class="text-lg font-semibold text-slate-200 mb-6">Recent Interventions</h2>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="border-b border-slate-800 text-slate-400 text-xs uppercase tracking-wider">
+                <th class="pb-3 font-medium">Customer</th>
+                <th class="pb-3 font-medium">Cart Value</th>
+                <th class="pb-3 font-medium">Strategy Chosen</th>
+                <th class="pb-3 text-right font-medium">Status</th>
+              </tr>
+            </thead>
+            <tbody id="attempts-table" class="divide-y divide-slate-800/50">
+              <tr><td colspan="4" class="py-6 text-center text-slate-500 text-sm">Loading data...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    let chart;
+
+    async function loadStats() {
+      try {
+        const res = await fetch('/api/stats');
+        const data = await res.json();
+
+        document.getElementById('total-carts').textContent = data.total_carts || 0;
+        document.getElementById('total-attempts').textContent = data.total_attempts || 0;
+        document.getElementById('total-converted').textContent = data.total_converted || 0;
+        document.getElementById('recovery-rate').textContent = 
+          data.recovery_rate ? `${data.recovery_rate}%` : '0%';
+
+        updateChart(data.by_message_type || {});
+      } catch (e) {
+        console.error('Stats load error:', e);
+      }
+    }
+
+    async function loadAttempts() {
+      try {
+        const res = await fetch('/api/attempts');
+        const attempts = await res.json();
+
+        // Update reasoning log
+        const log = document.getElementById('reasoning-log');
+        if (attempts.length > 0) {
+          log.innerHTML = attempts.slice(0, 5).map(a => `
+            <div class="reasoning-log-item p-3 rounded-lg">
+              <div class="flex justify-between items-start mb-1">
+                <span class="text-slate-400 text-[10px] uppercase tracking-wider">${formatTime(a.sent_at)}</span>
+                <span class="text-[10px] px-2 py-0.5 rounded-full ${a.converted ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-slate-800 text-slate-300 border border-slate-700'}">
+                  ${a.converted ? 'Converted' : a.message_type}
+                </span>
+              </div>
+              <p class="text-slate-200 text-sm font-medium mb-1">₹${a.cart_value} | ${a.user_type}</p>
+              <p class="text-slate-400 text-xs italic leading-relaxed">"${a.agent_reasoning}"</p>
+            </div>
+          `).join('');
+        }
+
+        // Update attempts table
+        const table = document.getElementById('attempts-table');
+        if (attempts.length > 0) {
+          table.innerHTML = attempts.map(a => `
+            <tr class="hover:bg-white/[0.02] transition-colors">
+              <td class="py-4">
+                <p class="text-sm text-slate-200 font-medium">${a.customer_email || 'Anonymous'}</p>
+              </td>
+              <td class="py-4 text-sm text-slate-300">₹${a.cart_value}</td>
+              <td class="py-4">
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                  ${a.message_type}
+                </span>
+              </td>
+              <td class="py-4 text-right">
+                ${a.converted 
+                  ? '<span class="inline-flex items-center gap-1 text-emerald-400 text-sm font-medium"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Converted</span>' 
+                  : '<span class="text-slate-500 text-sm">Pending</span>'
+                }
+              </td>
+            </tr>
+          `).join('');
+        }
+      } catch (e) {
+        console.error('Attempts load error:', e);
+      }
+    }
+
+    function updateChart(byType) {
+      const labels = Object.keys(byType);
+      const values = labels.map(k => byType[k]);
+
+      if (chart) chart.destroy();
+      const ctx = document.getElementById('conversionChart').getContext('2d');
+      
+      // Gradient for chart
+      const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+      gradient.addColorStop(0, 'rgba(79, 172, 254, 0.8)');
+      gradient.addColorStop(1, 'rgba(79, 172, 254, 0.1)');
+
+      chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [{
+            label: 'Conversions',
+            data: values,
+            backgroundColor: gradient,
+            borderColor: '#4facfe',
+            borderWidth: 1,
+            borderRadius: 6,
+            hoverBackgroundColor: '#00f2fe'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { 
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: 'rgba(15, 23, 42, 0.9)',
+              titleFont: { family: 'Outfit', size: 13 },
+              bodyFont: { family: 'Outfit', size: 14, weight: 'bold' },
+              padding: 12,
+              borderColor: 'rgba(255,255,255,0.1)',
+              borderWidth: 1,
+              displayColors: false
+            }
+          },
+          scales: {
+            y: { 
+              beginAtZero: true,
+              ticks: { color: '#64748b', font: { family: 'Outfit' } }, 
+              grid: { color: 'rgba(255,255,255,0.05)', borderDash: [5, 5] },
+              border: { display: false }
+            },
+            x: { 
+              ticks: { color: '#94a3b8', font: { family: 'Outfit' } }, 
+              grid: { display: false },
+              border: { display: false }
+            }
+          }
+        }
+      });
+    }
+
+    async function simulateCart() {
+      const value = document.getElementById('sim-value').value || 2500;
+      const type = document.getElementById('sim-type').value;
+      const product = document.getElementById('sim-product').value || 'Test Product';
+      const btn = document.querySelector('button');
+      const resultText = document.getElementById('sim-result');
+      
+      const originalText = btn.innerHTML;
+      btn.innerHTML = `<svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Processing...`;
+      btn.disabled = true;
+      
+      // Helper for sleep
+      const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+
+      try {
+        // Start realistic sequence
+        resultText.classList.replace('text-red-400', 'text-blue-400');
+        resultText.textContent = `[1/4] Ingesting Shopify checkouts/create webhook...`;
+        
+        // Actually fire the API request in the background
+        const simPromise = fetch('/api/simulate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ cartValue: value, userType: type, productName: product })
+        });
+
+        await sleep(800);
+        resultText.textContent = `[2/4] Deterministic layer evaluating ₹${value} cart...`;
+        
+        await sleep(900);
+        resultText.textContent = `[3/4] LLM formulating contextual recovery strategy...`;
+        
+        // Wait for the actual API to finish
+        await simPromise; 
+        
+        await sleep(600);
+        resultText.textContent = `[4/4] ✨ Intervention dispatched! Awaiting customer action.`;
+        
+        // Trigger table update
+        setTimeout(loadAttempts, 1000); 
+
+      } catch (e) {
+        resultText.textContent = 'Error: API connection failed.';
+        resultText.classList.replace('text-blue-400', 'text-red-400');
+      } finally {
+        setTimeout(() => {
+          btn.innerHTML = originalText;
+          btn.disabled = false;
+        }, 1500);
+      }
+    }
+
+    function formatTime(ts) {
+      return new Date(ts).toLocaleString('en-IN', { 
+        timeZone: 'Asia/Kolkata',
+        hour: '2-digit', minute: '2-digit', second: '2-digit'
+      });
+    }
+
+    // Initialize
+    loadStats();
+    loadAttempts();
+    setInterval(() => { loadStats(); loadAttempts(); }, 15000);
+  </script>
+</body>
+</html>
