@@ -5,7 +5,7 @@ RecoverAI is built on a Node.js (Express) backend, utilizing Shopify Webhooks, S
 
 **Data Flow:**
 1.  **Ingestion:** Shopify `checkouts/create` webhook sends payload to `/webhooks/checkout/abandoned` (via ngrok for local dev).
-2.  **Analysis (Deterministic):** `cartAnalyzer.js` parses the webhook, standardizes currency, extracts line items, and classifies the cart into a `value_tier` (low, medium, high) and `product_category`.
+2.  **Analysis (Deterministic):** `cartAnalyzer.js` parses the webhook, extracts the currency field as-is from the payload (defaulting to `INR` if absent), extracts line items, and classifies the cart into a `value_tier` (low, medium, high) and `product_category`. *(Note: no currency conversion is performed — multi-currency normalization is a known limitation tracked under Future Work.)*
 3.  **Strategy Formulation:** `agentDecision.js` calls Gemini to decide the optimal recovery strategy (tone, timing, message type, and whether to offer a discount), then schedules the escalation sequence. The AI decision is bounded by deterministic rules set in `cartAnalyzer.js` — the LLM cannot exceed the discount ceiling or override cart value tiers.
 4.  **Generation (AI):** `messageGenerator.js` prompts the Gemini model with strict JSON output instructions to generate the subject and body of the recovery message.
 5.  **Delivery:** `emailService.js` dispatches the message.

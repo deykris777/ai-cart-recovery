@@ -320,7 +320,10 @@
         // Actually fire the API request in the background
         const simPromise = fetch('/api/simulate', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            'x-demo-key': 'test123'
+          },
           body: JSON.stringify({ cartValue: value, userType: type, productName: product })
         });
 
@@ -454,7 +457,10 @@
       try {
         const res  = await fetch('/api/simulate', {
           method : 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            'x-demo-key': 'test123'
+          },
           body   : JSON.stringify({
             cartValue  : document.getElementById('sim-value').value,
             email      : document.getElementById('sim-email').value,

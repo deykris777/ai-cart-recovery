@@ -10,6 +10,8 @@ Cart abandonment is the biggest revenue leak in ecommerce. Most recovery today i
 ## Required Links
 *   **GitHub Repository:** https://github.com/deykris777/ai-cart-recovery
 *   **Demo Video:** [INSERT AFTER RECORDING]
+
+    > The demo opens with a real Shopify abandoned-checkout webhook hitting the `/webhooks/checkout/abandoned` endpoint, showing the raw payload logged in real time as the deterministic engine classifies the cart by value tier and product category. The server logs then reveal the Gemini agent working through its strategy decision — selecting tone, timing, and whether to apply a discount — before committing to a single recovery plan bounded by the hard rules set in `cartAnalyzer.js`. Finally, the AI-generated email subject and body appear in the logs and land in the buyer's inbox, demonstrating the full pipeline from abandoned cart signal to personalized, context-aware recovery message in under 10 seconds.
 *   **Product Document:** [PRODUCT_DOC.md](./PRODUCT_DOC.md)
 *   **Technical Document:** [TECHNICAL_DOC.md](./TECHNICAL_DOC.md)
 *   **Decision Log:** [DECISIONS.md](./DECISIONS.md)

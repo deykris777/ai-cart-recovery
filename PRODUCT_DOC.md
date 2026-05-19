@@ -21,6 +21,12 @@ RecoverAI solves this by moving from **batch-and-blast to real-time conversation
 *   **What we built:** A smart intervention system that analyzes carts deterministically but generates communication generatively.
 *   **What we chose NOT to build:** We did not build a chat widget on the checkout page itself.
     *   *Why:* Injecting scripts into Shopify's checkout is highly restricted (requires Checkout Extensibility) and often degrades page load times. Intervening immediately *post-abandonment* via existing channels (email) is safer, universally compatible, and easier for merchants to adopt.
+*   **No SMS channel.**
+    *   *Why:* Email was chosen as the first channel deliberately. SMS requires verified sender numbers, carrier compliance (TCPA/GDPR opt-in), and per-message costs that vary by country — all meaningful surface area for a first build. Email has a universal delivery layer (SMTP/SendGrid), zero per-message regulatory overhead at the prototype stage, and is the channel merchants already own the opt-in for at checkout. SMS is the obvious v2 extension once the core loop is proven.
+*   **No inbound reply parsing.**
+    *   *Why:* RecoverAI sends one-way transactional email. Parsing and routing replies would require a dedicated inbound mail webhook (e.g., SendGrid Inbound Parse), intent classification on free-text replies, and a human-escalation path — none of which are necessary to demonstrate the core value proposition. One-way communication is entirely acceptable for v1: the goal is to unblock the purchase, not to open a support ticket. A reply-to CX alias satisfies the edge case.
+*   **No real-time A/B testing of email variants.**
+    *   *Why:* A/B testing requires a statistically significant sample size, holdout group management, and time — three things a hackathon build has none of. More importantly, it would complicate the AI's decision loop: the agent currently commits to a single best-guess strategy per cart. Running controlled experiments on top of a generative system adds a layer of non-determinism that makes evaluation ambiguous. This belongs in a post-launch instrumentation pass, not the prototype.
 
 ## Key Tradeoffs
 *   **Speed vs. Complexity:** We traded deep multi-turn conversation memory for high-speed, single-shot contextual generation. A multi-turn bot over email is too slow; instead, we aim to resolve friction in one highly targeted message.
