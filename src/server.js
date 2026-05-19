@@ -30,7 +30,7 @@ app.get('/health', (req, res) => {
   res.json({ status: 'RecoverAI Agent is running 🚀', time: new Date() });
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   logger.info(`RecoverAI server running on port ${PORT}`);
   startEscalationChecker(); // Start the cron job
 });
