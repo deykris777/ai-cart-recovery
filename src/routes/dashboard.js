@@ -30,14 +30,14 @@ router.post('/simulate', async (req, res) => {
   }
 
   try {
-    const { cartValue, userType, productName } = req.body;
+    const { cartValue, email, userType, productName } = req.body;
 
     const fakeCheckout = {
       id: `DEMO_${Date.now()}`,
       total_price: cartValue || '2500.00',
       currency: 'INR',
-      email: req.body.email || 'demo@test.com',
-      customer: userType === 'returning' ? { first_name: 'Demo' } : null,
+      email: email || 'demo@test.com',
+      customer: userType === 'returning' ? { first_name: 'Demo', email: email || 'demo@test.com' } : null,
       billing_address: { first_name: 'Demo' },
       line_items: [{
         title: productName || 'Demo Product',
@@ -68,6 +68,7 @@ router.get('/agent-log', async (req, res) => {
     const attempts = await getRecentAttempts(20);
     const log = attempts.map(a => ({
       id: a.id,
+      cart_id: a.cart_id,
       sent_at: a.sent_at,
       cart_value: a.cart_value,
       user_type: a.user_type,
@@ -77,7 +78,9 @@ router.get('/agent-log', async (req, res) => {
       discount_percent: a.discount_percent,
       agent_reasoning: a.agent_reasoning,
       email_subject: a.email_subject,
-      converted: a.converted
+      converted: a.converted,
+      confidence: a.confidence,
+      risk: a.risk
     }));
     res.json(log);
   } catch (error) {

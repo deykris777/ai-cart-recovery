@@ -471,8 +471,10 @@
     }
 
     function updateChart(byType) {
-      const labels = Object.keys(byType);
-      const values = labels.map(k => byType[k]);
+      const defaults = { reminder: 0, discount: 0, social_proof: 0, scarcity: 0 };
+      const merged = { ...defaults, ...byType };
+      const labels = Object.keys(merged);
+      const values = labels.map(k => merged[k]);
       if (chart) chart.destroy();
       const ctx = document.getElementById('conversionChart').getContext('2d');
       const gradient = ctx.createLinearGradient(0, 0, 0, 400);
@@ -523,6 +525,29 @@
 
   <script>
     /* ── Simulator ── */
+    async function pollForCartUpdate(cartId) {
+      const maxPolls = 15;
+      let count = 0;
+      
+      const interval = setInterval(async () => {
+        count++;
+        try {
+          const res = await fetch('/api/agent-log');
+          const log = await res.json();
+          
+          const found = Array.isArray(log) && log.some(entry => entry.cart_id === cartId);
+          if (found || count >= maxPolls) {
+            clearInterval(interval);
+            loadAgentLog();
+            loadAttempts();
+            loadStats();
+          }
+        } catch (e) {
+          console.error("Polling error:", e);
+        }
+      }, 1500);
+    }
+
     async function runSimulation() {
       const btn = document.querySelector('button[onclick="runSimulation()"]');
       const box = document.getElementById('sim-result');
@@ -553,8 +578,8 @@
             `Tier: <strong>${c.value_tier}</strong> &nbsp;|&nbsp; ` +
             `Category: <strong>${c.product_category}</strong> &nbsp;|&nbsp; ` +
             `Customer: <strong>${c.user_type}</strong><br>` +
-            `<span class="text-slate-500 text-xs">Check the reasoning log below — it will update in ~3 s once Gemini responds.</span>`;
-          setTimeout(loadAgentLog, 3500);
+            `<span class="text-slate-500 text-xs">Check the reasoning log below — it will update as soon as the agent decides (~5-15 s).</span>`;
+          pollForCartUpdate(c.id);
         } else {
           msg.textContent = '❌ Error: ' + (data.error || 'Unknown error');
         }
