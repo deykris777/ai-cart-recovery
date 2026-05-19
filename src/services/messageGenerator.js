@@ -4,19 +4,23 @@ const logger = require('../utils/logger');
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 async function generateRecoveryEmail(cartData, decision) {
+  const discountLine = decision.discount_percent > 0
+    ? `- Include discount code: RECOVER${decision.discount_percent} for ${decision.discount_percent}% off`
+    : '- Do NOT mention any discount';
+
   const prompt = `
 Write a checkout recovery email for a customer who abandoned their cart.
 
 CUSTOMER INFO:
-- Name: \${cartData.customer_name}
-- Cart Value: ₹\${cartData.cart_value}
-- Products: \${cartData.products.map(p => p.title).join(', ')}
-- Customer Type: \${cartData.user_type}
+- Name: ${cartData.customer_name}
+- Cart Value: ₹${cartData.cart_value}
+- Products: ${cartData.products.map(p => p.title).join(', ')}
+- Customer Type: ${cartData.user_type}
 
 EMAIL STRATEGY:
-- Type: \${decision.message_type}
-- Tone: \${decision.tone}
-\${decision.discount_percent > 0 ? \`- Include discount code: RECOVER\${decision.discount_percent} for \${decision.discount_percent}% off\` : '- Do NOT mention any discount'}
+- Type: ${decision.message_type}
+- Tone: ${decision.tone}
+${discountLine}
 
 STRICT RULES:
 - Keep email under 120 words
@@ -34,27 +38,60 @@ Reply ONLY with this JSON:
 }
 `;
 
-  const model = genAI.getGenerativeModel({ 
-    model: "gemini-2.5-flash",
-    generationConfig: { responseMimeType: "application/json" }
-  });
-  const result = await model.generateContent(prompt);
-  const rawText = result.response.text();
-
-  let emailContent;
   try {
-    const cleanText = rawText.replace(/```json\n?|```/g, '').replace(/[\u0000-\u001F]+/g, " ");
-    emailContent = JSON.parse(cleanText);
-  } catch (parseError) {
-    logger.warn(`JSON Parse error for email: ${parseError.message}. Using fallback email.`);
-    emailContent = {
-      subject: `Don't forget your cart, ${cartData.customer_name}!`,
-      body: `Hi ${cartData.customer_name},\n\nWe noticed you left some items in your cart. Come back and complete your purchase today!\n\nBest,\nThe Team`
-    };
-  }
+    const model = genAI.getGenerativeModel({ 
+      model: "gemini-2.5-flash",
+      generationConfig: { responseMimeType: "application/json" }
+    });
+    const result = await model.generateContent(prompt);
+    const rawText = result.response.text();
 
-  logger.info(`📧 Email generated: "${emailContent.subject}"`);
-  return emailContent;
+    let emailContent;
+    try {
+      let cleanText = rawText
+        .replace(/```json\s*/gi, '')
+        .replace(/```/g, '')
+        .replace(/[\u0000-\u001F\u007F]+/g, ' ')
+        .trim();
+      // Extract first {...} block in case model adds surrounding text
+      const firstBrace = cleanText.indexOf('{');
+      const lastBrace  = cleanText.lastIndexOf('}');
+      if (firstBrace !== -1 && lastBrace !== -1) {
+        cleanText = cleanText.substring(firstBrace, lastBrace + 1);
+      }
+      emailContent = JSON.parse(cleanText);
+    } catch (parseError) {
+      logger.warn(`JSON Parse error for email: ${parseError.message}. Using fallback email.`);
+      emailContent = buildFallbackEmail(cartData, decision);
+    }
+
+    logger.info(`📧 Email generated: "${emailContent.subject}"`);
+    return emailContent;
+
+  } catch (geminiError) {
+    logger.warn(`⚠️  Gemini email generation failed (${geminiError.message}). Using template fallback.`);
+    return buildFallbackEmail(cartData, decision);
+  }
+}
+
+function buildFallbackEmail(cartData, decision) {
+  const name = cartData.customer_name || 'there';
+  const value = cartData.cart_value ? `₹${cartData.cart_value}` : 'your items';
+  const discountLine = decision.discount_percent > 0
+    ? `\n\nAs a thank-you, use code RECOVER${decision.discount_percent} for ${decision.discount_percent}% off.`
+    : '';
+
+  const subjects = {
+    discount:     `Special offer just for you — complete your ₹${cartData.cart_value || ''} order`,
+    social_proof: `Others are loving what you left behind`,
+    scarcity:     `Your cart is almost gone — act fast!`,
+    reminder:     `You left something behind`
+  };
+
+  return {
+    subject: subjects[decision.message_type] || `Don't forget your cart, ${name}!`,
+    body: `Hi ${name},\n\nWe noticed you left ${value} worth of items in your cart.${discountLine}\n\nCome back and complete your purchase — we'd love to have you.\n\nBest,\nThe RecoverAI Team`
+  };
 }
 
 module.exports = { generateRecoveryEmail };

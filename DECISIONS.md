@@ -21,3 +21,8 @@ A running list of architectural and product decisions made during the build of R
 *   **Considered:** Retrying the LLM call 3 times if it fails to return valid JSON.
 *   **Chose:** Zero retries, immediate static fallback.
 *   **Because:** In a real-time recovery scenario, latency is the enemy. Waiting for 3 failed LLM calls could delay the process significantly. If the LLM fails once, we log the error and immediately send a safe, pre-written static template. Reliability beats slight personalization in edge cases.
+
+### 5. Dual Escalation Architecture: setTimeout vs Cron
+*   **Considered:** Relying solely on `setTimeout` for follow-ups or solely on a cron job.
+*   **Chose:** A dual architecture using both `setTimeout` (with demo mode scaling) and a cron job (`escalationChecker.js`).
+*   **Because:** `setTimeout` enables rapid testing in demo mode (compressing 24 hours to minutes) but doesn't survive server restarts. The cron job acts as a production safety net for multi-day follow-ups. Double-sending is prevented by checking the attempt count (`attempts.length === 1`) in the database before sending.

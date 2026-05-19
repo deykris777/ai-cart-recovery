@@ -6,7 +6,7 @@ RecoverAI is built on a Node.js (Express) backend, utilizing Shopify Webhooks, S
 **Data Flow:**
 1.  **Ingestion:** Shopify `checkouts/create` webhook sends payload to `/webhooks/checkout/abandoned` (via ngrok for local dev).
 2.  **Analysis (Deterministic):** `cartAnalyzer.js` parses the webhook, standardizes currency, extracts line items, and classifies the cart into a `value_tier` (low, medium, high) and `product_category`.
-3.  **Strategy Formulation:** `escalationChecker.js` checks the state in Supabase and decides the next step based on the cart's deterministic profile.
+3.  **Strategy Formulation:** `agentDecision.js` calls Gemini to decide the optimal recovery strategy (tone, timing, message type, and whether to offer a discount), then schedules the escalation sequence. The AI decision is bounded by deterministic rules set in `cartAnalyzer.js` — the LLM cannot exceed the discount ceiling or override cart value tiers.
 4.  **Generation (AI):** `messageGenerator.js` prompts the Gemini model with strict JSON output instructions to generate the subject and body of the recovery message.
 5.  **Delivery:** `emailService.js` dispatches the message.
 
@@ -26,3 +26,5 @@ RecoverAI is designed to fail gracefully across several potential points of fail
 ## Known Limitations & Future Work
 *   **Single Channel:** Currently limited to Email. Adding SMS via Twilio would improve conversion rates for urgent, high-intent carts.
 *   **One-Way Communication:** The system sends emails but doesn't yet parse customer replies to handle objections (e.g., if a user replies "Shipping is too high"). Future iterations would pipe inbound email replies back through the LLM.
+*   Dual escalation systems (setTimeout + cron) should be unified in production into a job queue (e.g. Bull/BullMQ with Redis) so escalations survive server restarts without risk of duplicate sends.
+

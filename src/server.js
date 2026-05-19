@@ -18,6 +18,7 @@ app.use(express.static(path.join(__dirname, '../dashboard')));
 // Routes
 app.use('/webhooks', webhookRoutes);
 app.use('/api', dashboardRoutes);
+app.use('/dashboard', dashboardRoutes); // alias for step-guide curl commands
 
 // Serve dashboard
 app.get('/', (req, res) => {

@@ -145,34 +145,7 @@
     <!-- Demo Simulator & Table Grid -->
     <div class="grid lg:grid-cols-3 gap-6">
       
-      <!-- Simulator -->
-      <div class="lg:col-span-1 glass-card rounded-2xl p-6 border-blue-500/20 shadow-[0_0_30px_rgba(59,130,246,0.1)]">
-        <h2 class="text-lg font-semibold text-slate-200 mb-2">Simulate Abandonment</h2>
-        <p class="text-slate-400 text-sm mb-6">Trigger a dummy webhook for the judges.</p>
-        
-        <div class="space-y-4">
-          <div>
-            <label class="block text-xs font-medium text-slate-400 mb-1 uppercase">Cart Value (₹)</label>
-            <input id="sim-value" type="number" placeholder="e.g. 4500" class="w-full bg-black/20 border border-slate-700/50 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all text-white placeholder-slate-600" />
-          </div>
-          <div>
-            <label class="block text-xs font-medium text-slate-400 mb-1 uppercase">Customer Type</label>
-            <select id="sim-type" class="w-full bg-black/20 border border-slate-700/50 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all text-white appearance-none">
-              <option value="new" class="bg-slate-900">New Customer</option>
-              <option value="returning" class="bg-slate-900">Returning Customer</option>
-            </select>
-          </div>
-          <div>
-            <label class="block text-xs font-medium text-slate-400 mb-1 uppercase">Product Category Hint</label>
-            <input id="sim-product" type="text" placeholder="e.g. Running Shoes" class="w-full bg-black/20 border border-slate-700/50 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all text-white placeholder-slate-600" />
-          </div>
-          <button onclick="simulateCart()" class="w-full accent-bg hover:opacity-90 text-white font-semibold rounded-xl px-4 py-3 text-sm transition-all transform hover:scale-[1.02] shadow-lg shadow-blue-500/25 flex justify-center items-center gap-2">
-            Trigger Agent 
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-          </button>
-          <p id="sim-result" class="text-blue-400 text-xs font-medium text-center h-4"></p>
-        </div>
-      </div>
+
 
       <!-- Recent Table -->
       <div class="lg:col-span-2 glass-card rounded-2xl p-6">
@@ -256,7 +229,7 @@
               <td class="py-4 text-right">
                 ${a.converted 
                   ? '<span class="inline-flex items-center gap-1 text-emerald-400 text-sm font-medium"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Converted</span>' 
-                  : '<span class="text-slate-500 text-sm">Pending</span>'
+                  : '<span class="inline-flex items-center gap-1 text-blue-400 text-sm">✉️ Sent</span>'
                 }
               </td>
             </tr>
@@ -388,6 +361,249 @@
     loadStats();
     loadAttempts();
     setInterval(() => { loadStats(); loadAttempts(); }, 15000);
+  </script>
+  <!-- ── RECOVERYAI SIMULATOR + AGENT LOG ── -->
+  <div style="max-width:900px;margin:40px auto 80px;padding:0 20px;font-family:inherit;">
+
+    <!-- Simulator Panel -->
+    <h2 style="font-size:1.4rem;font-weight:700;margin-bottom:16px;color:#e2e8f0;">
+      🧪 Test Recovery Agent
+    </h2>
+    <div style="background:#1e1e2e;border:1px solid #2d2d3f;border-radius:12px;padding:24px;
+                display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+
+      <div>
+        <label style="display:block;font-size:0.78rem;color:#888;margin-bottom:6px;
+                      text-transform:uppercase;letter-spacing:.05em;">Cart Value (₹)</label>
+        <input id="sim-value" type="number" value="2500"
+               style="width:100%;padding:10px 12px;background:#12121a;border:1px solid #333;
+                      border-radius:8px;color:#fff;font-size:1rem;box-sizing:border-box;" />
+      </div>
+
+      <div>
+        <label style="display:block;font-size:0.78rem;color:#888;margin-bottom:6px;
+                      text-transform:uppercase;letter-spacing:.05em;">Customer Email</label>
+        <input id="sim-email" type="email" value="demo@test.com"
+               style="width:100%;padding:10px 12px;background:#12121a;border:1px solid #333;
+                      border-radius:8px;color:#fff;font-size:1rem;box-sizing:border-box;" />
+      </div>
+
+      <div>
+        <label style="display:block;font-size:0.78rem;color:#888;margin-bottom:6px;
+                      text-transform:uppercase;letter-spacing:.05em;">Product Name</label>
+        <input id="sim-product" type="text" value="Nike Air Max 270"
+               style="width:100%;padding:10px 12px;background:#12121a;border:1px solid #333;
+                      border-radius:8px;color:#fff;font-size:1rem;box-sizing:border-box;" />
+      </div>
+
+      <div>
+        <label style="display:block;font-size:0.78rem;color:#888;margin-bottom:6px;
+                      text-transform:uppercase;letter-spacing:.05em;">Customer Type</label>
+        <select id="sim-type"
+                style="width:100%;padding:10px 12px;background:#12121a;border:1px solid #333;
+                       border-radius:8px;color:#fff;font-size:1rem;box-sizing:border-box;">
+          <option value="new">New Customer</option>
+          <option value="returning">Returning Customer</option>
+        </select>
+      </div>
+
+      <div style="grid-column:1/-1;">
+        <button onclick="runSimulation()"
+                style="width:100%;padding:14px;
+                       background:linear-gradient(135deg,#7c3aed,#4f46e5);
+                       border:none;border-radius:8px;color:#fff;
+                       font-size:1rem;font-weight:700;cursor:pointer;
+                       transition:opacity .2s;"
+                onmouseover="this.style.opacity='.85'"
+                onmouseout="this.style.opacity='1'">
+          🚀 Fire Recovery Agent
+        </button>
+      </div>
+
+      <div id="sim-result"
+           style="grid-column:1/-1;display:none;padding:16px;background:#0d1117;
+                  border-radius:8px;border-left:4px solid #7c3aed;">
+        <p id="sim-result-text" style="margin:0;font-size:0.9rem;color:#ccc;"></p>
+      </div>
+    </div>
+
+    <!-- Agent Reasoning Log -->
+    <h2 style="font-size:1.4rem;font-weight:700;margin:48px 0 16px;color:#e2e8f0;">
+      🤖 Agent Reasoning Log
+    </h2>
+    <div id="agent-log" style="display:flex;flex-direction:column;gap:12px;">
+      <p style="color:#555;font-size:0.9rem;">Loading agent decisions…</p>
+    </div>
+
+    <!-- Live-refresh badge -->
+    <p style="text-align:center;margin-top:20px;font-size:0.75rem;color:#444;">
+      Auto-refreshes every 15 s &nbsp;·&nbsp;
+      <span id="last-refresh" style="color:#555;">—</span>
+    </p>
+  </div>
+
+  <script>
+    /* ── Simulator ── */
+    async function runSimulation() {
+      const btn   = document.querySelector('button[onclick="runSimulation()"]');
+      const box   = document.getElementById('sim-result');
+      const msg   = document.getElementById('sim-result-text');
+      btn.textContent = '⏳ Agent is thinking…';
+      btn.disabled    = true;
+
+      try {
+        const res  = await fetch('/api/simulate', {
+          method : 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body   : JSON.stringify({
+            cartValue  : document.getElementById('sim-value').value,
+            email      : document.getElementById('sim-email').value,
+            productName: document.getElementById('sim-product').value,
+            userType   : document.getElementById('sim-type').value
+          })
+        });
+        const data = await res.json();
+        box.style.display = 'block';
+
+        if (data.success) {
+          const c = data.cart;
+          msg.innerHTML =
+            `✅ <strong>Agent triggered!</strong> &nbsp;|&nbsp; ` +
+            `Tier: <strong>${c.value_tier}</strong> &nbsp;|&nbsp; ` +
+            `Category: <strong>${c.product_category}</strong> &nbsp;|&nbsp; ` +
+            `Customer: <strong>${c.user_type}</strong><br>` +
+            `<span style="color:#888;font-size:.85rem;">
+               Check the reasoning log below — it will update in ~3 s once Gemini responds.
+             </span>`;
+          setTimeout(loadAgentLog, 3500);
+        } else {
+          msg.textContent = '❌ Error: ' + (data.error || 'Unknown error');
+        }
+      } catch (e) {
+        box.style.display = 'block';
+        msg.textContent   = '❌ Request failed: ' + e.message;
+      }
+
+      btn.textContent = '🚀 Fire Recovery Agent';
+      btn.disabled    = false;
+    }
+
+    /* ── Agent Log ── */
+    const TYPE_STYLES = {
+      discount    : { bg: '#3b1f1f', color: '#f87171' },
+      social_proof: { bg: '#1f2d1f', color: '#4ade80' },
+      scarcity    : { bg: '#2d2a1f', color: '#fbbf24' },
+      reminder    : { bg: '#1f1f3b', color: '#818cf8' }
+    };
+
+    function typeBadge(type) {
+      const s = TYPE_STYLES[type] || { bg: '#2d2d3f', color: '#aaa' };
+      return `<span style="font-size:.75rem;background:${s.bg};padding:4px 10px;
+                border-radius:20px;color:${s.color};margin-left:8px;">${type}</span>`;
+    }
+
+    function riskDot(risk) {
+      const colors = { low: '#4ade80', medium: '#fbbf24', high: '#f87171' };
+      const c = colors[risk] || '#888';
+      return risk
+        ? `<span style="font-size:.75rem;color:${c};margin-left:8px;">● ${risk} risk</span>`
+        : '';
+    }
+
+    async function loadAgentLog() {
+      const container = document.getElementById('agent-log');
+      try {
+        const res  = await fetch('/api/agent-log');
+        const log  = await res.json();
+
+        document.getElementById('last-refresh').textContent =
+          'Last updated ' + new Date().toLocaleTimeString();
+
+        if (!Array.isArray(log) || log.length === 0) {
+          container.innerHTML =
+            '<p style="color:#555;font-size:.9rem;">No agent decisions yet. ' +
+            'Run a simulation above to see reasoning here.</p>';
+          return;
+        }
+
+        container.innerHTML = log.map(entry => `
+          <div style="background:#1e1e2e;border:1px solid #2d2d3f;
+                      border-radius:12px;padding:20px;">
+
+            <!-- Header row -->
+            <div style="display:flex;justify-content:space-between;
+                        align-items:flex-start;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+              <div style="display:flex;align-items:center;flex-wrap:wrap;gap:4px;">
+                <span style="font-size:.75rem;background:#2d2d3f;padding:4px 10px;
+                             border-radius:20px;color:#aaa;">
+                  Attempt #${entry.attempt_number}
+                </span>
+                ${typeBadge(entry.message_type)}
+                ${riskDot(entry.risk)}
+                ${entry.converted
+                  ? '<span style="font-size:.75rem;background:#14532d;padding:4px 10px;' +
+                    'border-radius:20px;color:#4ade80;margin-left:8px;">✅ CONVERTED</span>'
+                  : ''}
+              </div>
+              <span style="font-size:.75rem;color:#555;white-space:nowrap;">
+                ${new Date(entry.sent_at).toLocaleString()}
+              </span>
+            </div>
+
+            <!-- Email subject -->
+            <p style="margin:0 0 4px;font-size:.95rem;font-weight:600;color:#e2e8f0;">
+              "${entry.email_subject || 'No subject recorded'}"
+            </p>
+
+            <!-- Confidence bar -->
+            ${entry.confidence != null ? `
+            <div style="margin:10px 0 4px;">
+              <div style="display:flex;justify-content:space-between;
+                          font-size:.75rem;color:#666;margin-bottom:4px;">
+                <span>Agent Confidence</span>
+                <span>${Math.round(entry.confidence * 100)}%</span>
+              </div>
+              <div style="background:#2d2d3f;border-radius:4px;height:6px;overflow:hidden;">
+                <div style="height:100%;border-radius:4px;
+                            background:linear-gradient(90deg,#7c3aed,#4f46e5);
+                            width:${Math.round(entry.confidence * 100)}%;"></div>
+              </div>
+            </div>` : ''}
+
+            <!-- Reasoning block -->
+            <div style="background:#12121a;border-left:3px solid #7c3aed;
+                        padding:12px 14px;border-radius:0 8px 8px 0;margin-top:10px;">
+              <p style="margin:0 0 4px;font-size:.75rem;color:#666;
+                        text-transform:uppercase;letter-spacing:.05em;">🧠 Agent Reasoning</p>
+              <p style="margin:0;font-size:.9rem;color:#c4b5fd;font-style:italic;">
+                "${entry.agent_reasoning || 'No reasoning recorded'}"
+              </p>
+            </div>
+
+            <!-- Footer meta -->
+            <div style="display:flex;flex-wrap:wrap;gap:16px;margin-top:12px;">
+              <span style="font-size:.8rem;color:#666;">💰 ₹${entry.cart_value ?? '?'}</span>
+              <span style="font-size:.8rem;color:#666;">👤 ${entry.user_type ?? '?'}</span>
+              <span style="font-size:.8rem;color:#666;">✉️ ${entry.customer_email ?? '?'}</span>
+              ${(entry.discount_percent > 0)
+                ? `<span style="font-size:.8rem;color:#f87171;">
+                     🏷️ ${entry.discount_percent}% off applied
+                   </span>`
+                : ''}
+            </div>
+          </div>
+        `).join('');
+
+      } catch (e) {
+        container.innerHTML =
+          '<p style="color:#f87171;font-size:.9rem;">Failed to load agent log: ' +
+          e.message + '</p>';
+      }
+    }
+
+    /* Boot */
+    loadAgentLog();
+    setInterval(loadAgentLog, 15000);
   </script>
 </body>
 </html>

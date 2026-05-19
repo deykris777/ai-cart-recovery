@@ -27,6 +27,13 @@ async function checkAndEscalate() {
 
     for (const cart of carts) {
       const attempts = await getCartAttempts(cart.id);
+
+      // Skip carts with no recorded attempts (e.g. saved to mock DB only)
+      if (!attempts || attempts.length === 0) {
+        logger.info(`   Skipping cart ${cart.id} — no attempts recorded yet`);
+        continue;
+      }
+
       const lastAttempt = attempts[attempts.length - 1];
       const hoursSinceLast = getHoursSince(lastAttempt.sent_at);
 
@@ -76,7 +83,10 @@ async function escalate(cart, attemptNumber, messageType, discountPercent) {
       agent_reasoning: decision.reasoning,
       email_subject: emailContent.subject,
       email_body: emailContent.body,
-      delay_hours_used: 24
+      delay_hours_used: 24,
+      cart_value: cart.cart_value,
+      user_type: cart.user_type,
+      customer_email: cart.customer_email
     });
 
     logger.info(`✅ Escalation attempt ${attemptNumber} sent`);

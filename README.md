@@ -8,14 +8,14 @@
 Cart abandonment is the biggest revenue leak in ecommerce. Most recovery today is a static follow-up email sent hours later. RecoverAI intervenes in real time, deterministically analyzing the cart's value and contents, and using AI to generate context-aware, personalized interventions that address the buyer's likely friction points.
 
 ## Required Links
-*   **Demo Video:** [Insert YouTube/Drive Link Here]
+*   **GitHub Repository:** [Insert GitHub Repository Link Here]
+*   **Demo Video:** [INSERT AFTER RECORDING]
 *   **Product Document:** [PRODUCT_DOC.md](./PRODUCT_DOC.md)
 *   **Technical Document:** [TECHNICAL_DOC.md](./TECHNICAL_DOC.md)
 *   **Decision Log:** [DECISIONS.md](./DECISIONS.md)
 
 ## Contribution Note
-*(Team/Solo): Note down who led product thinking vs. development, or how time was split.*
-Example: Solo participation. Spent 40% of time on product framing, failure handling design, and documentation; 60% on implementing the Node/Express backend, Shopify webhooks, and Gemini API integration.
+Solo participation. 35% on product framing, scope decisions, and documentation; 65% on implementing the Node/Express backend, Shopify webhooks, Gemini AI integration, Supabase state management, and escalation logic.
 
 ## Setup Instructions
 1. Run `npm install`

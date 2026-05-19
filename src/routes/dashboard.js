@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { getDashboardStats, getRecentAttempts, getAgentDecisions } = require('../db/queries');
+const { getDashboardStats, getRecentAttempts } = require('../db/queries');
 
 // Main stats endpoint
 router.get('/stats', async (req, res) => {
@@ -24,6 +24,11 @@ router.get('/attempts', async (req, res) => {
 
 // Test endpoint — simulate an abandoned cart (for demo)
 router.post('/simulate', async (req, res) => {
+  // FIX 5: Demo secret guard — require x-demo-key header if DEMO_SECRET is set
+  if (process.env.DEMO_SECRET && req.headers['x-demo-key'] !== process.env.DEMO_SECRET) {
+    return res.status(401).json({ error: 'Unauthorized. Provide x-demo-key header.' });
+  }
+
   try {
     const { cartValue, userType, productName } = req.body;
 
@@ -47,10 +52,34 @@ router.post('/simulate', async (req, res) => {
     const { handleAbandonedCart } = require('../services/agentDecision');
 
     const cartData = analyzeCart(fakeCheckout);
-    await saveAbandonedCart(cartData);
+    const savedCart = await saveAbandonedCart(cartData);
+    cartData.id = savedCart.id; // Ensure the agent has the DB ID
     handleAbandonedCart(cartData); // async
 
     res.json({ success: true, message: 'Simulation started', cart: cartData });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Agent reasoning log — last 20 attempts with full decision metadata
+router.get('/agent-log', async (req, res) => {
+  try {
+    const attempts = await getRecentAttempts(20);
+    const log = attempts.map(a => ({
+      id: a.id,
+      sent_at: a.sent_at,
+      cart_value: a.cart_value,
+      user_type: a.user_type,
+      customer_email: a.customer_email,
+      attempt_number: a.attempt_number,
+      message_type: a.message_type,
+      discount_percent: a.discount_percent,
+      agent_reasoning: a.agent_reasoning,
+      email_subject: a.email_subject,
+      converted: a.converted
+    }));
+    res.json(log);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

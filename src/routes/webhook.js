@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const crypto = require('crypto');
 const { handleAbandonedCart } = require('../services/agentDecision');
-const { saveAbandonedCart } = require('../db/queries');
+const { saveAbandonedCart, updateCartStatus } = require('../db/queries');
 const { analyzeCart } = require('../utils/cartAnalyzer');
 const logger = require('../utils/logger');
 
@@ -23,8 +23,13 @@ router.post('/checkout/abandoned', async (req, res) => {
   res.status(200).send('OK');
 
   try {
-    // Optional: verify signature in production
-    // if (!verifyWebhook(req)) return logger.warn('Invalid webhook signature');
+    // FIX 4: Verify signature in production only
+    if (process.env.NODE_ENV === 'production') {
+      if (!verifyWebhook(req)) {
+        logger.warn('⚠️ Invalid webhook signature — request rejected');
+        return;
+      }
+    }
 
     const checkout = req.body;
     logger.info(`🛒 Abandoned cart detected: ${checkout.id}`);
@@ -34,13 +39,29 @@ router.post('/checkout/abandoned', async (req, res) => {
     const cartData = analyzeCart(checkout);
 
     // Save to database
-    await saveAbandonedCart(cartData);
+    const savedCart = await saveAbandonedCart(cartData);
+    cartData.id = savedCart.id; // Ensure the agent has the DB ID
 
     // Trigger AI agent (async, non-blocking)
     handleAbandonedCart(cartData);
 
   } catch (error) {
     logger.error(`Webhook processing error: ${error.message}`);
+  }
+});
+
+// FIX 2: Order paid webhook — marks the cart as converted, stopping further follow-ups
+router.post('/order/paid', async (req, res) => {
+  res.status(200).send('OK');
+  try {
+    const order = req.body;
+    const checkoutId = String(order.checkout_id);
+    if (checkoutId && checkoutId !== 'undefined') {
+      await updateCartStatus(checkoutId, 'converted');
+      logger.info(`✅ Order paid — cart ${checkoutId} marked as converted. Agent stopping follow-ups.`);
+    }
+  } catch (error) {
+    logger.error(`Order paid webhook error: ${error.message}`);
   }
 });
 

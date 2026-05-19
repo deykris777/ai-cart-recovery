@@ -35,6 +35,14 @@ async function updateCartStatus(shopifyCheckoutId, status) {
   }
 }
 
+async function getCart(shopifyCheckoutId) {
+  const { data, error } = await supabase.from('abandoned_carts').select('*').eq('shopify_checkout_id', shopifyCheckoutId).single();
+  if (error) {
+    return mockDb.carts.find(c => c.shopify_checkout_id === shopifyCheckoutId) || null;
+  }
+  return data;
+}
+
 async function getCartsForEscalation() {
   const { data, error } = await supabase.from('abandoned_carts').select('*').eq('status', 'in_recovery');
   if (error) return mockDb.carts.filter(c => c.status === 'in_recovery');
@@ -75,14 +83,32 @@ async function getDashboardStats() {
 }
 
 async function getRecentAttempts(limit = 10) {
-  const { data, error } = await supabase.from('recovery_attempts').select(`*, abandoned_carts (cart_value, user_type, customer_email, product_category)`).order('sent_at', { ascending: false }).limit(limit);
+  const { data, error } = await supabase
+    .from('recovery_attempts')
+    .select(`*, abandoned_carts (cart_value, user_type, customer_email, product_category)`)
+    .order('sent_at', { ascending: false })
+    .limit(limit);
+
   if (error) {
     return mockDb.attempts.slice(-limit).reverse().map(a => {
       let cart = mockDb.carts.find(c => c.id === a.cart_id);
-      return { ...a, cart_value: cart?.cart_value, user_type: cart?.user_type, customer_email: cart?.customer_email };
+      return {
+        ...a,
+        cart_value: a.cart_value ?? cart?.cart_value,
+        user_type: a.user_type ?? cart?.user_type,
+        customer_email: a.customer_email ?? cart?.customer_email
+      };
     });
   }
-  return data?.map(a => ({ ...a, cart_value: a.abandoned_carts?.cart_value, user_type: a.abandoned_carts?.user_type, customer_email: a.abandoned_carts?.customer_email }));
+
+  return data?.map(a => ({
+    ...a,
+    // prefer denormalized columns saved directly on the attempt row;
+    // fall back to the joined abandoned_carts record
+    cart_value:     a.cart_value     ?? a.abandoned_carts?.cart_value,
+    user_type:      a.user_type      ?? a.abandoned_carts?.user_type,
+    customer_email: a.customer_email ?? a.abandoned_carts?.customer_email
+  }));
 }
 
 async function getHistoricalStats(userType) {
@@ -116,6 +142,7 @@ module.exports = {
   saveAbandonedCart,
   saveRecoveryAttempt,
   updateCartStatus,
+  getCart,
   getCartsForEscalation,
   getCartAttempts,
   getDashboardStats,
