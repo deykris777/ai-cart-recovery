@@ -613,78 +613,90 @@
 
     async function loadAgentLog() {
       const container = document.getElementById('agent-log');
+      console.log('🤖 loadAgentLog(): fetching agent decisions...');
       try {
         const res = await fetch('/api/agent-log');
+        console.log('🤖 loadAgentLog(): HTTP status =', res.status);
         const log = await res.json();
+        console.log('🤖 loadAgentLog(): received data =', log);
 
         document.getElementById('last-refresh').textContent =
           'Last updated ' + new Date().toLocaleTimeString();
 
         if (!Array.isArray(log) || log.length === 0) {
+          console.warn('🤖 loadAgentLog(): no decisions found or invalid format.');
           container.innerHTML =
             '<p class="text-slate-600 text-sm">No agent decisions yet. Run a simulation above to see reasoning here.</p>';
           return;
         }
 
-        container.innerHTML = log.map(entry => `
-        <div class="log-card p-4 sm:p-5">
+        container.innerHTML = log.map(entry => {
+          try {
+            return `
+            <div class="log-card p-4 sm:p-5">
 
-          <!-- Header: badges left, timestamp right -->
-          <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 mb-3">
-            <div class="flex flex-wrap items-center gap-1.5">
-              <span class="badge-default" style="font-size:.75rem;padding:4px 10px;border-radius:20px;display:inline-block;">
-                Attempt #${entry.attempt_number}
-              </span>
-              ${typeBadge(entry.message_type)}
-              ${riskDot(entry.risk)}
-              ${entry.converted
-            ? '<span style="font-size:.75rem;background:#14532d;padding:4px 10px;border-radius:20px;color:#4ade80;display:inline-block;">✅ CONVERTED</span>'
-            : ''}
+              <!-- Header: badges left, timestamp right -->
+              <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 mb-3">
+                <div class="flex flex-wrap items-center gap-1.5">
+                  <span class="badge-default" style="font-size:.75rem;padding:4px 10px;border-radius:20px;display:inline-block;">
+                    Attempt #${entry.attempt_number}
+                  </span>
+                  ${typeBadge(entry.message_type)}
+                  ${riskDot(entry.risk)}
+                  ${entry.converted
+                ? '<span style="font-size:.75rem;background:#14532d;padding:4px 10px;border-radius:20px;color:#4ade80;display:inline-block;">✅ CONVERTED</span>'
+                : ''}
+                </div>
+                <span class="text-slate-600 text-xs whitespace-nowrap">
+                  ${new Date(entry.sent_at).toLocaleString()}
+                </span>
+              </div>
+
+              <!-- Email subject -->
+              <p class="text-slate-100 font-semibold text-sm sm:text-[0.95rem] mb-2 leading-snug">
+                "${entry.email_subject || 'No subject recorded'}"
+              </p>
+
+              <!-- Confidence bar -->
+              ${entry.confidence != null ? `
+              <div class="mb-3">
+                <div class="flex justify-between text-xs text-slate-600 mb-1">
+                  <span>Agent Confidence</span>
+                  <span>${Math.round(entry.confidence * 100)}%</span>
+                </div>
+                <div class="w-full h-1.5 rounded bg-slate-800 overflow-hidden">
+                  <div class="conf-bar-fill" style="width:${Math.round(entry.confidence * 100)}%"></div>
+                </div>
+              </div>` : ''}
+
+              <!-- Reasoning -->
+              <div class="reasoning-block p-3 sm:p-4 mt-2">
+                <p class="text-[10px] text-slate-600 uppercase tracking-widest mb-1">🧠 Agent Reasoning</p>
+                <p class="text-[#c4b5fd] text-sm italic leading-relaxed">
+                  "${entry.agent_reasoning || 'No reasoning recorded'}"
+                </p>
+              </div>
+
+              <!-- Footer meta -->
+              <div class="flex flex-wrap gap-3 sm:gap-4 mt-3">
+                <span class="text-xs text-slate-500">💰 ₹${entry.cart_value ?? '?'}</span>
+                <span class="text-xs text-slate-500">👤 ${entry.user_type ?? '?'}</span>
+                <span class="text-xs text-slate-500 break-all">✉️ ${entry.customer_email ?? '?'}</span>
+                ${entry.discount_percent > 0
+                ? `<span class="text-xs text-red-400">🏷️ ${entry.discount_percent}% off applied</span>`
+                : ''}
+              </div>
+
             </div>
-            <span class="text-slate-600 text-xs whitespace-nowrap">
-              ${new Date(entry.sent_at).toLocaleString()}
-            </span>
-          </div>
-
-          <!-- Email subject -->
-          <p class="text-slate-100 font-semibold text-sm sm:text-[0.95rem] mb-2 leading-snug">
-            "${entry.email_subject || 'No subject recorded'}"
-          </p>
-
-          <!-- Confidence bar -->
-          ${entry.confidence != null ? `
-          <div class="mb-3">
-            <div class="flex justify-between text-xs text-slate-600 mb-1">
-              <span>Agent Confidence</span>
-              <span>${Math.round(entry.confidence * 100)}%</span>
-            </div>
-            <div class="w-full h-1.5 rounded bg-slate-800 overflow-hidden">
-              <div class="conf-bar-fill" style="width:${Math.round(entry.confidence * 100)}%"></div>
-            </div>
-          </div>` : ''}
-
-          <!-- Reasoning -->
-          <div class="reasoning-block p-3 sm:p-4 mt-2">
-            <p class="text-[10px] text-slate-600 uppercase tracking-widest mb-1">🧠 Agent Reasoning</p>
-            <p class="text-[#c4b5fd] text-sm italic leading-relaxed">
-              "${entry.agent_reasoning || 'No reasoning recorded'}"
-            </p>
-          </div>
-
-          <!-- Footer meta -->
-          <div class="flex flex-wrap gap-3 sm:gap-4 mt-3">
-            <span class="text-xs text-slate-500">💰 ₹${entry.cart_value ?? '?'}</span>
-            <span class="text-xs text-slate-500">👤 ${entry.user_type ?? '?'}</span>
-            <span class="text-xs text-slate-500 break-all">✉️ ${entry.customer_email ?? '?'}</span>
-            ${entry.discount_percent > 0
-            ? `<span class="text-xs text-red-400">🏷️ ${entry.discount_percent}% off applied</span>`
-            : ''}
-          </div>
-
-        </div>
-      `).join('');
+          `;
+          } catch (itemErr) {
+            console.error('🤖 loadAgentLog(): failed to render entry', entry, itemErr);
+            return `<div class="p-4 border border-red-500/20 bg-red-500/5 text-red-400 text-xs rounded-xl">Error rendering log entry: ${itemErr.message}</div>`;
+          }
+        }).join('');
 
       } catch (e) {
+        console.error('🤖 loadAgentLog() error:', e);
         container.innerHTML =
           `<p class="text-red-400 text-sm">Failed to load agent log: ${e.message}</p>`;
       }
