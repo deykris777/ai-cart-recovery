@@ -5,7 +5,7 @@ sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 async function sendRecoveryEmail(to, name, emailContent) {
   console.log(`📧 Attempting to send to: ${to}`);
-  console.log(`📧 Using sender: ${process.env.SENDGRID_FROM_EMAIL}`);
+  console.log(`📧 Using sender: ${process.env.SENDER_EMAIL}`);
   console.log(`📧 API key starts with: ${process.env.SENDGRID_API_KEY?.substring(0,6)}`);
 
   const msg = {
