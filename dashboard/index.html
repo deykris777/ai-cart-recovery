@@ -511,10 +511,19 @@
     }
 
     function formatTime(ts) {
-      return new Date(ts).toLocaleString('en-IN', {
-        timeZone: 'Asia/Kolkata',
-        hour: '2-digit', minute: '2-digit', second: '2-digit'
-      });
+      try {
+        return new Date(ts).toLocaleString('en-IN', {
+          timeZone: 'Asia/Kolkata',
+          hour: '2-digit', minute: '2-digit', second: '2-digit'
+        });
+      } catch (e) {
+        console.warn('formatTime with Asia/Kolkata failed, falling back:', e);
+        try {
+          return new Date(ts).toLocaleTimeString();
+        } catch (e2) {
+          return String(ts);
+        }
+      }
     }
 
     // Initialize
