@@ -7,7 +7,9 @@ async function sendRecoveryEmail(to, name, emailContent) {
   console.log(`📧 Attempting to send to: ${to}`);
   console.log(`📧 Using sender: ${process.env.SENDER_EMAIL}`);
   console.log(`📧 API key starts with: ${process.env.SENDGRID_API_KEY?.substring(0,6)}`);
-
+  if (process.env.SENDER_EMAIL && process.env.SENDER_EMAIL.endsWith('@gmail.com')) {
+    logger.warn(`⚠️  DMARC Warning: Using a @gmail.com email (${process.env.SENDER_EMAIL}) as SENDER_EMAIL via SendGrid. Gmail's DMARC policy prevents third-party services from sending mail as @gmail.com. These emails will likely be dropped/blocked by Gmail or other receivers. Use a custom domain sender for real delivery.`);
+  }
   const msg = {
     to,
     from: process.env.SENDER_EMAIL,

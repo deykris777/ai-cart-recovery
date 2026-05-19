@@ -1,6 +1,8 @@
+require('dotenv').config();
+const crypto = require('crypto');
 const http = require('http');
 
-const payload = JSON.stringify({
+const dataObj = {
   id: "1234567890",
   total_price: "4500.00",
   currency: "INR",
@@ -19,17 +21,29 @@ const payload = JSON.stringify({
       price: "4500.00"
     }
   ]
-});
+};
+
+const payload = JSON.stringify(dataObj);
+
+const headers = {
+  'Content-Type': 'application/json',
+  'Content-Length': Buffer.byteLength(payload)
+};
+
+if (process.env.SHOPIFY_WEBHOOK_SECRET) {
+  const hash = crypto
+    .createHmac('sha256', process.env.SHOPIFY_WEBHOOK_SECRET)
+    .update(payload, 'utf8')
+    .digest('base64');
+  headers['x-shopify-hmac-sha256'] = hash;
+}
 
 const options = {
   hostname: 'localhost',
   port: 3000,
   path: '/webhooks/checkout/abandoned',
   method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-    'Content-Length': Buffer.byteLength(payload)
-  }
+  headers: headers
 };
 
 const req = http.request(options, (res) => {

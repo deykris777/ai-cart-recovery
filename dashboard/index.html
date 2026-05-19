@@ -384,10 +384,18 @@
   <script>
     let chart;
 
+    function getBaseUrl() {
+      if (window.location.protocol === 'file:' || 
+          (window.location.port !== '3000' && window.location.port !== '')) {
+        return 'http://localhost:3000';
+      }
+      return '';
+    }
+
     /* ── Stats & top section ── */
     async function loadStats() {
       try {
-        const res = await fetch('/api/stats');
+        const res = await fetch(getBaseUrl() + '/api/stats');
         const data = await res.json();
         document.getElementById('total-carts').textContent = data.total_carts || 0;
         document.getElementById('total-attempts').textContent = data.total_attempts || 0;
@@ -399,12 +407,12 @@
 
     async function loadAttempts() {
       try {
-        const res = await fetch('/api/attempts');
+        const res = await fetch(getBaseUrl() + '/api/attempts');
         const attempts = await res.json();
 
         /* Live reasoning sidebar */
         const log = document.getElementById('reasoning-log');
-        if (attempts.length > 0) {
+        if (Array.isArray(attempts) && attempts.length > 0) {
           log.innerHTML = attempts.slice(0, 5).map(a => `
           <div class="reasoning-log-item p-3 rounded-lg">
             <div class="flex justify-between items-start mb-1">
@@ -423,7 +431,7 @@
 
         /* Desktop table */
         const table = document.getElementById('attempts-table');
-        if (attempts.length > 0) {
+        if (Array.isArray(attempts) && attempts.length > 0) {
           table.innerHTML = attempts.map(a => `
           <tr class="hover:bg-white/[0.02] transition-colors">
             <td class="py-4">
@@ -446,7 +454,7 @@
 
         /* Mobile cards */
         const cards = document.getElementById('attempts-cards');
-        if (attempts.length > 0) {
+        if (Array.isArray(attempts) && attempts.length > 0) {
           cards.innerHTML = attempts.map(a => `
           <div class="rounded-xl p-4 border border-slate-800 bg-white/[0.02] space-y-2">
             <div class="flex items-start justify-between gap-2 flex-wrap">
@@ -541,7 +549,7 @@
       const interval = setInterval(async () => {
         count++;
         try {
-          const res = await fetch('/api/agent-log');
+          const res = await fetch(getBaseUrl() + '/api/agent-log');
           const log = await res.json();
           
           const found = Array.isArray(log) && log.some(entry => entry.cart_id === cartId);
@@ -568,7 +576,7 @@
       box.classList.remove('hidden');
 
       try {
-        const res = await fetch('/api/simulate', {
+        const res = await fetch(getBaseUrl() + '/api/simulate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'x-demo-key': 'test123' },
           body: JSON.stringify({
@@ -624,7 +632,7 @@
       const container = document.getElementById('agent-log');
       console.log('🤖 loadAgentLog(): fetching agent decisions...');
       try {
-        const res = await fetch('/api/agent-log');
+        const res = await fetch(getBaseUrl() + '/api/agent-log');
         console.log('🤖 loadAgentLog(): HTTP status =', res.status);
         const log = await res.json();
         console.log('🤖 loadAgentLog(): received data =', log);

@@ -28,10 +28,46 @@ async function saveRecoveryAttempt(attemptData) {
 }
 
 async function updateCartStatus(shopifyCheckoutId, status) {
-  const { error } = await supabase.from('abandoned_carts').update({ status }).eq('shopify_checkout_id', shopifyCheckoutId);
+  const { data, error } = await supabase
+    .from('abandoned_carts')
+    .update({ status })
+    .eq('shopify_checkout_id', shopifyCheckoutId)
+    .select();
+
   if (error) {
+    logger.warn(`Supabase update error: ${error.message}`);
     let cart = mockDb.carts.find(c => c.shopify_checkout_id === shopifyCheckoutId);
-    if (cart) cart.status = status;
+    if (cart) {
+      cart.status = status;
+      if (status === 'converted') {
+        const mockAttempts = mockDb.attempts.filter(a => a.cart_id === cart.id);
+        if (mockAttempts.length > 0) {
+          const lastAttempt = mockAttempts[mockAttempts.length - 1];
+          lastAttempt.converted = true;
+          lastAttempt.converted_at = new Date().toISOString();
+        }
+      }
+    }
+    return;
+  }
+
+  // Propagate conversion to the most recent recovery attempt row
+  if (status === 'converted' && data && data.length > 0) {
+    const cartId = data[0].id;
+    const { data: attempts, error: attError } = await supabase
+      .from('recovery_attempts')
+      .select('id')
+      .eq('cart_id', cartId)
+      .order('sent_at', { ascending: false })
+      .limit(1);
+
+    if (!attError && attempts && attempts.length > 0) {
+      await supabase
+        .from('recovery_attempts')
+        .update({ converted: true, converted_at: new Date().toISOString() })
+        .eq('id', attempts[0].id);
+      logger.info(`✅ Propagated conversion to recovery attempt: ${attempts[0].id}`);
+    }
   }
 }
 
@@ -101,7 +137,7 @@ async function getRecentAttempts(limit = 10) {
     });
   }
 
-  return data?.map(a => ({
+  return (data || []).map(a => ({
     ...a,
     // prefer denormalized columns saved directly on the attempt row;
     // fall back to the joined abandoned_carts record
