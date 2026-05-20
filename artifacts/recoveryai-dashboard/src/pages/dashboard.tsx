@@ -34,6 +34,8 @@ import {
   Mail,
   IndianRupee,
   Package,
+  Sun,
+  Moon,
 } from "lucide-react";
 
 const STRATEGY_CONVERTED_COLORS: Record<string, string> = {
@@ -92,6 +94,24 @@ const MOCK_PRODUCTS = [
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState("dashboard");
+  const [theme, setTheme] = useState<"dark" | "light">(() => {
+    if (typeof window !== "undefined") {
+      return (localStorage.getItem("theme") as "dark" | "light") || "dark";
+    }
+    return "dark";
+  });
+
+  useEffect(() => {
+    const root = window.document.documentElement;
+    root.setAttribute("data-theme", theme);
+    localStorage.setItem("theme", theme);
+  }, [theme]);
+
+  const isDark = theme === "dark";
+  const chartTextColor = isDark ? "#6B7280" : "#9CA3AF";
+  const chartTooltipBg = isDark ? "#0E1318" : "#FFFFFF";
+  const chartTooltipBorder = isDark ? "#1C232B" : "#E5E7EB";
+  const chartTooltipText = isDark ? "#F3F4F6" : "#111827";
 
   // Fetching real data via the API client hooks
   const { data: kpis, isLoading: isKpisLoading, refetch: refetchKpis } = useGetKpis();
@@ -271,8 +291,17 @@ export default function Dashboard() {
               Live updates
             </span>
           </div>
-          <div className="text-xs font-mono text-textSecondary">
-            System time: {new Date().toLocaleTimeString()}
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              className="p-1.5 rounded-full hover:bg-border/60 text-textSecondary hover:text-textPrimary transition-all border border-border flex items-center justify-center"
+              title={`Switch to ${theme === "dark" ? "Light" : "Dark"} Mode`}
+            >
+              {theme === "dark" ? <Sun size={14} className="text-accent" /> : <Moon size={14} className="text-accent" />}
+            </button>
+            <div className="hidden sm:block text-xs font-mono text-textSecondary">
+              System time: {new Date().toLocaleTimeString()}
+            </div>
           </div>
         </header>
 
@@ -386,23 +415,23 @@ export default function Dashboard() {
                           <BarChart data={chartData} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
                             <XAxis
                               dataKey="strategy"
-                              stroke="#6B7280"
+                              stroke={chartTextColor}
                               fontSize={10}
                               tickLine={false}
                               axisLine={false}
                             />
                             <YAxis
-                              stroke="#6B7280"
+                              stroke={chartTextColor}
                               fontSize={10}
                               tickLine={false}
                               axisLine={false}
                             />
                             <Tooltip
                               contentStyle={{
-                                backgroundColor: "#0E1318",
-                                borderColor: "#1C232B",
+                                backgroundColor: chartTooltipBg,
+                                borderColor: chartTooltipBorder,
                                 borderRadius: "4px",
-                                color: "#F3F4F6",
+                                color: chartTooltipText,
                                 fontSize: "11px",
                               }}
                               itemStyle={{ color: "#2DD4BF" }}

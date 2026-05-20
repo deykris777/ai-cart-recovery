@@ -7,14 +7,14 @@ export default {
   theme: {
     extend: {
       colors: {
-        background: "#080C10",
-        surface: "#0E1318",
-        border: "#1C232B",
-        accent: "#2DD4BF",
-        "accent-dim": "rgba(45, 212, 191, 0.15)",
-        textPrimary: "#F3F4F6",
-        textSecondary: "#9CA3AF",
-        textMuted: "#6B7280",
+        background: "var(--color-background)",
+        surface: "var(--color-surface)",
+        border: "var(--color-border)",
+        accent: "var(--color-accent)",
+        "accent-dim": "var(--color-accent-dim)",
+        textPrimary: "var(--color-text-primary)",
+        textSecondary: "var(--color-text-secondary)",
+        textMuted: "var(--color-text-muted)",
       },
       fontFamily: {
         sans: ["Geist", "Inter", "system-ui", "sans-serif"],
