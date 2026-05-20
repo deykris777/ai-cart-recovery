@@ -208,6 +208,17 @@ export default function Dashboard() {
               <span>Dashboard Overview</span>
             </button>
             <button
+              onClick={() => setActiveTab("simulator")}
+              className={`w-full flex items-center gap-3 px-3 py-2 rounded text-xs font-medium transition-all ${
+                activeTab === "simulator"
+                  ? "bg-accent-dim text-accent border-l-2 border-accent"
+                  : "text-textSecondary hover:text-textPrimary hover:bg-border/30"
+              }`}
+            >
+              <Zap size={16} />
+              <span>AI Simulator Playground</span>
+            </button>
+            <button
               onClick={() => setActiveTab("interventions")}
               className={`w-full flex items-center gap-3 px-3 py-2 rounded text-xs font-medium transition-all ${
                 activeTab === "interventions"
@@ -259,6 +270,15 @@ export default function Dashboard() {
           <span>Overview</span>
         </button>
         <button
+          onClick={() => setActiveTab("simulator")}
+          className={`flex flex-col items-center justify-center gap-1 text-[10px] font-medium transition-all ${
+            activeTab === "simulator" ? "text-accent" : "text-textSecondary"
+          }`}
+        >
+          <Zap size={18} />
+          <span>Simulator</span>
+        </button>
+        <button
           onClick={() => setActiveTab("interventions")}
           className={`flex flex-col items-center justify-center gap-1 text-[10px] font-medium transition-all ${
             activeTab === "interventions" ? "text-accent" : "text-textSecondary"
@@ -274,7 +294,7 @@ export default function Dashboard() {
           }`}
         >
           <Terminal size={18} />
-          <span>Decision Logs</span>
+          <span>Logs</span>
         </button>
       </nav>
 
@@ -284,6 +304,7 @@ export default function Dashboard() {
           <div className="flex items-center gap-3">
             <h2 className="text-sm font-semibold tracking-wider uppercase text-textPrimary">
               {activeTab === "dashboard" && "Mission Control Overview"}
+              {activeTab === "simulator" && "AI Simulator Playground"}
               {activeTab === "interventions" && "All Recovery Attempts"}
               {activeTab === "logs" && "Live Decision Rationale Feed"}
             </h2>
@@ -399,221 +420,69 @@ export default function Dashboard() {
                 </div>
               )}
 
-              {/* Core Charts and Simulator Layout */}
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* 3. Grouped Bar Chart */}
-                <div className="lg:col-span-2 bg-surface border border-border rounded p-6 flex flex-col justify-between">
-                  <div>
-                    <h3 className="text-xs font-bold uppercase tracking-wider text-textPrimary mb-4">
-                      Attempts vs Converted per Strategy
-                    </h3>
-                    <div className="h-72 w-full">
-                      {isChartLoading ? (
-                        <div className="h-full w-full bg-border/20 rounded animate-pulse" />
-                      ) : (
-                        <ResponsiveContainer width="100%" height="100%">
-                          <BarChart data={chartData} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
-                            <XAxis
-                              dataKey="strategy"
-                              stroke={chartTextColor}
-                              fontSize={10}
-                              tickLine={false}
-                              axisLine={false}
-                            />
-                            <YAxis
-                              stroke={chartTextColor}
-                              fontSize={10}
-                              tickLine={false}
-                              axisLine={false}
-                            />
-                            <Tooltip
-                              contentStyle={{
-                                backgroundColor: chartTooltipBg,
-                                borderColor: chartTooltipBorder,
-                                borderRadius: "4px",
-                                color: chartTooltipText,
-                                fontSize: "11px",
-                              }}
-                              itemStyle={{ color: "#2DD4BF" }}
-                            />
-                            <Legend
-                              verticalAlign="top"
-                              height={36}
-                              iconType="rect"
-                              iconSize={10}
-                              wrapperStyle={{ fontSize: "10px", textTransform: "uppercase", letterSpacing: "1px" }}
-                            />
-                            <Bar dataKey="attempts" name="Attempts Initiated" radius={[2, 2, 0, 0]}>
-                              {chartData?.map((entry: any, index: number) => (
-                                <Cell
-                                  key={`cell-attempts-${index}`}
-                                  fill={STRATEGY_ATTEMPTS_COLORS[entry.strategy] || "rgba(45, 212, 191, 0.2)"}
-                                  stroke={STRATEGY_CONVERTED_COLORS[entry.strategy] || "#2DD4BF"}
-                                  strokeWidth={1}
-                                  strokeDasharray="3 3"
-                                />
-                              ))}
-                            </Bar>
-                            <Bar dataKey="converted" name="Converted Revenue" radius={[2, 2, 0, 0]}>
-                              {chartData?.map((entry: any, index: number) => (
-                                <Cell
-                                  key={`cell-converted-${index}`}
-                                  fill={STRATEGY_CONVERTED_COLORS[entry.strategy] || "#2DD4BF"}
-                                />
-                              ))}
-                            </Bar>
-                          </BarChart>
-                        </ResponsiveContainer>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                {/* 7. Simulator Panel */}
-                <div className="bg-surface border border-border rounded p-6 flex flex-col justify-between">
-                  <div>
-                    <div className="flex justify-between items-center mb-4">
-                      <h3 className="text-xs font-bold uppercase tracking-wider text-textPrimary flex items-center gap-2">
-                        <Zap size={14} className="text-accent" />
-                        Agent Simulator
-                      </h3>
-                      <button
-                        onClick={() => setIsAutoSimulating(!isAutoSimulating)}
-                        type="button"
-                        className={`flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-mono font-bold tracking-wider uppercase border transition-all ${
-                          isAutoSimulating
-                            ? "bg-accent/15 text-accent border-accent/30 animate-pulse"
-                            : "bg-border/30 text-textMuted border-border hover:text-textSecondary"
-                        }`}
-                      >
-                        <span className={`w-1.5 h-1.5 rounded-full ${isAutoSimulating ? "bg-accent" : "bg-textMuted"}`} />
-                        {isAutoSimulating ? "Auto-Pilot: ON" : "Auto-Pilot: OFF"}
-                      </button>
-                    </div>
-                    <form onSubmit={handleSimulate} className="space-y-4 text-xs">
-                      <div>
-                        <label className="block text-textMuted font-medium mb-1 font-mono uppercase tracking-wider text-[9px]">
-                          Customer Email
-                        </label>
-                        <div className="relative">
-                          <Mail size={12} className="absolute left-2.5 top-2.5 text-textMuted" />
-                          <input
-                            type="email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            required
-                            disabled={isAutoSimulating}
-                            className="w-full bg-background border border-border rounded pl-8 pr-3 py-2 text-textPrimary focus:outline-none focus:border-accent text-xs disabled:opacity-50 disabled:cursor-not-allowed"
+              {/* 3. Grouped Bar Chart (Full Width) */}
+              <div className="bg-surface border border-border rounded p-6 flex flex-col justify-between mb-6">
+                <div>
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-textPrimary mb-4">
+                    Attempts vs Converted per Strategy
+                  </h3>
+                  <div className="h-72 w-full">
+                    {isChartLoading ? (
+                      <div className="h-full w-full bg-border/20 rounded animate-pulse" />
+                    ) : (
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={chartData} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
+                          <XAxis
+                            dataKey="strategy"
+                            stroke={chartTextColor}
+                            fontSize={10}
+                            tickLine={false}
+                            axisLine={false}
                           />
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-3">
-                        <div>
-                          <label className="block text-textMuted font-medium mb-1 font-mono uppercase tracking-wider text-[9px]">
-                            Cart Value (₹)
-                          </label>
-                          <div className="relative">
-                            <IndianRupee size={12} className="absolute left-2.5 top-2.5 text-textMuted" />
-                            <input
-                              type="number"
-                              value={cartValue}
-                              onChange={(e) => setCartValue(e.target.value)}
-                              required
-                              disabled={isAutoSimulating}
-                              className="w-full bg-background border border-border rounded pl-8 pr-3 py-2 text-textPrimary focus:outline-none focus:border-accent text-xs disabled:opacity-50 disabled:cursor-not-allowed"
-                            />
-                          </div>
-                        </div>
-                        <div>
-                          <label className="block text-textMuted font-medium mb-1 font-mono uppercase tracking-wider text-[9px]">
-                            Customer Tier
-                          </label>
-                          <div className="relative">
-                            <User size={12} className="absolute left-2.5 top-2.5 text-textMuted" />
-                            <select
-                              value={customerType}
-                              onChange={(e) => setCustomerType(e.target.value)}
-                              disabled={isAutoSimulating}
-                              className="w-full bg-background border border-border rounded pl-8 pr-2 py-2 text-textPrimary focus:outline-none focus:border-accent text-xs appearance-none disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                              <option>Bronze</option>
-                              <option>Silver</option>
-                              <option>Gold</option>
-                              <option>VIP</option>
-                            </select>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div>
-                        <label className="block text-textMuted font-medium mb-1 font-mono uppercase tracking-wider text-[9px]">
-                          Product Name
-                        </label>
-                        <div className="relative">
-                          <Package size={12} className="absolute left-2.5 top-2.5 text-textMuted" />
-                          <input
-                            type="text"
-                            value={productName}
-                            onChange={(e) => setProductName(e.target.value)}
-                            required
-                            disabled={isAutoSimulating}
-                            className="w-full bg-background border border-border rounded pl-8 pr-3 py-2 text-textPrimary focus:outline-none focus:border-accent text-xs disabled:opacity-50 disabled:cursor-not-allowed"
+                          <YAxis
+                            stroke={chartTextColor}
+                            fontSize={10}
+                            tickLine={false}
+                            axisLine={false}
                           />
-                        </div>
-                      </div>
-
-                      <button
-                        type="submit"
-                        disabled={simulatorMutation.isPending || isAutoSimulating}
-                        className="w-full bg-accent hover:bg-accent/80 text-background font-bold uppercase tracking-wider py-2.5 px-4 rounded transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        {isAutoSimulating ? (
-                          <>
-                            <span className="w-2 h-2 rounded-full bg-background animate-ping" />
-                            <span>Auto-Pilot Simulating...</span>
-                          </>
-                        ) : (
-                          <>
-                            <Play size={12} fill="currentColor" />
-                            {simulatorMutation.isPending ? "Evaluating..." : "Run AI Simulation"}
-                          </>
-                        )}
-                      </button>
-                    </form>
-
-                    {/* Simulation Results Display */}
-                    {simulatorMutation.data && (
-                      <div className="mt-4 pt-4 border-t border-border space-y-3 font-mono">
-                        <div className="flex justify-between items-center text-[10px] text-textSecondary">
-                          <span>Decision</span>
-                          <span className="px-1.5 py-0.5 bg-accent-dim text-accent rounded uppercase text-[9px]">
-                            {simulatorMutation.data.strategy}
-                          </span>
-                        </div>
-                        <div className="flex justify-between items-center text-[10px] text-textSecondary">
-                          <span>Confidence Score</span>
-                          <span className="text-accent font-semibold">
-                            {(simulatorMutation.data.confidenceScore * 100).toFixed(0)}%
-                          </span>
-                        </div>
-                        <div className="text-[10px] space-y-1">
-                          <span className="text-textMuted block uppercase text-[8px] tracking-wider">
-                            Decision Reasoning
-                          </span>
-                          <p className="bg-background border border-border rounded p-2 text-textSecondary text-[10px] leading-relaxed">
-                            {simulatorMutation.data.reasoning}
-                          </p>
-                        </div>
-                        <div className="text-[10px] space-y-1">
-                          <span className="text-textMuted block uppercase text-[8px] tracking-wider">
-                            Generated Recovery Email
-                          </span>
-                          <p className="bg-background border border-border rounded p-2 text-textSecondary text-[10px] italic leading-relaxed">
-                            "{simulatorMutation.data.emailCopy}"
-                          </p>
-                        </div>
-                      </div>
+                          <Tooltip
+                            contentStyle={{
+                              backgroundColor: chartTooltipBg,
+                              borderColor: chartTooltipBorder,
+                              borderRadius: "4px",
+                              color: chartTooltipText,
+                              fontSize: "11px",
+                            }}
+                            itemStyle={{ color: "#2DD4BF" }}
+                          />
+                          <Legend
+                            verticalAlign="top"
+                            height={36}
+                            iconType="rect"
+                            iconSize={10}
+                            wrapperStyle={{ fontSize: "10px", textTransform: "uppercase", letterSpacing: "1px" }}
+                          />
+                          <Bar dataKey="attempts" name="Attempts Initiated" radius={[2, 2, 0, 0]}>
+                            {chartData?.map((entry: any, index: number) => (
+                              <Cell
+                                key={`cell-attempts-${index}`}
+                                fill={STRATEGY_ATTEMPTS_COLORS[entry.strategy] || "rgba(45, 212, 191, 0.2)"}
+                                stroke={STRATEGY_CONVERTED_COLORS[entry.strategy] || "#2DD4BF"}
+                                strokeWidth={1}
+                                strokeDasharray="3 3"
+                              />
+                            ))}
+                          </Bar>
+                          <Bar dataKey="converted" name="Converted Revenue" radius={[2, 2, 0, 0]}>
+                            {chartData?.map((entry: any, index: number) => (
+                              <Cell
+                                key={`cell-converted-${index}`}
+                                fill={STRATEGY_CONVERTED_COLORS[entry.strategy] || "#2DD4BF"}
+                              />
+                            ))}
+                          </Bar>
+                        </BarChart>
+                      </ResponsiveContainer>
                     )}
                   </div>
                 </div>
@@ -914,6 +783,218 @@ export default function Dashboard() {
                 </div>
               </div>
             </>
+          )}
+
+          {activeTab === "simulator" && (
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+              {/* Left Column: Input Form */}
+              <div className="lg:col-span-5 bg-surface border border-border rounded p-6">
+                <div className="flex justify-between items-center mb-4 border-b border-border pb-3">
+                  <div>
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-textPrimary flex items-center gap-2">
+                      <Zap size={14} className="text-accent animate-pulse" />
+                      Simulator Parameters
+                    </h3>
+                    <p className="text-[10px] text-textMuted mt-0.5 font-mono uppercase tracking-wider">Configure cart conditions</p>
+                  </div>
+                  <button
+                    onClick={() => setIsAutoSimulating(!isAutoSimulating)}
+                    type="button"
+                    className={`flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-mono font-bold tracking-wider uppercase border transition-all ${
+                      isAutoSimulating
+                        ? "bg-accent/15 text-accent border-accent/30 animate-pulse"
+                        : "bg-border/30 text-textMuted border-border hover:text-textSecondary"
+                    }`}
+                  >
+                    <span className={`w-1.5 h-1.5 rounded-full ${isAutoSimulating ? "bg-accent" : "bg-textMuted"}`} />
+                    {isAutoSimulating ? "Auto-Pilot: ON" : "Auto-Pilot: OFF"}
+                  </button>
+                </div>
+
+                <form onSubmit={handleSimulate} className="space-y-4 text-xs">
+                  <div>
+                    <label className="block text-textMuted font-medium mb-1.5 font-mono uppercase tracking-wider text-[9px]">
+                      Customer Email
+                    </label>
+                    <div className="relative">
+                      <Mail size={12} className="absolute left-2.5 top-2.5 text-textMuted" />
+                      <input
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
+                        disabled={isAutoSimulating}
+                        className="w-full bg-background border border-border rounded pl-8 pr-3 py-2 text-textPrimary focus:outline-none focus:border-accent text-xs disabled:opacity-50 disabled:cursor-not-allowed"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-textMuted font-medium mb-1.5 font-mono uppercase tracking-wider text-[9px]">
+                        Cart Value (₹)
+                      </label>
+                      <div className="relative">
+                        <IndianRupee size={12} className="absolute left-2.5 top-2.5 text-textMuted" />
+                        <input
+                          type="number"
+                          value={cartValue}
+                          onChange={(e) => setCartValue(e.target.value)}
+                          required
+                          disabled={isAutoSimulating}
+                          className="w-full bg-background border border-border rounded pl-8 pr-3 py-2 text-textPrimary focus:outline-none focus:border-accent text-xs disabled:opacity-50 disabled:cursor-not-allowed"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-textMuted font-medium mb-1.5 font-mono uppercase tracking-wider text-[9px]">
+                        Customer Tier
+                      </label>
+                      <div className="relative">
+                        <User size={12} className="absolute left-2.5 top-2.5 text-textMuted" />
+                        <select
+                          value={customerType}
+                          onChange={(e) => setCustomerType(e.target.value)}
+                          disabled={isAutoSimulating}
+                          className="w-full bg-background border border-border rounded pl-8 pr-2 py-2 text-textPrimary focus:outline-none focus:border-accent text-xs appearance-none disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          <option>Bronze</option>
+                          <option>Silver</option>
+                          <option>Gold</option>
+                          <option>VIP</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-textMuted font-medium mb-1.5 font-mono uppercase tracking-wider text-[9px]">
+                      Product Name
+                    </label>
+                    <div className="relative">
+                      <Package size={12} className="absolute left-2.5 top-2.5 text-textMuted" />
+                      <input
+                        type="text"
+                        value={productName}
+                        onChange={(e) => setProductName(e.target.value)}
+                        required
+                        disabled={isAutoSimulating}
+                        className="w-full bg-background border border-border rounded pl-8 pr-3 py-2 text-textPrimary focus:outline-none focus:border-accent text-xs disabled:opacity-50 disabled:cursor-not-allowed"
+                      />
+                    </div>
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={simulatorMutation.isPending || isAutoSimulating}
+                    className="w-full bg-accent hover:bg-accent/80 text-background font-bold uppercase tracking-wider py-2.5 px-4 rounded transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isAutoSimulating ? (
+                      <>
+                        <span className="w-2 h-2 rounded-full bg-background animate-ping" />
+                        <span>Auto-Pilot Simulating...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Play size={12} fill="currentColor" />
+                        {simulatorMutation.isPending ? "Evaluating..." : "Run AI Simulation"}
+                      </>
+                    )}
+                  </button>
+                </form>
+              </div>
+
+              {/* Right Column: Output & Previewer */}
+              <div className="lg:col-span-7 space-y-6">
+                {!simulatorMutation.data ? (
+                  /* Empty State */
+                  <div className="bg-surface border border-dashed border-border rounded-lg p-12 flex flex-col items-center justify-center text-center h-[340px] transition-all">
+                    <div className="h-12 w-12 rounded-full bg-accent-dim flex items-center justify-center text-accent mb-4">
+                      <Zap size={20} className="animate-pulse" />
+                    </div>
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-textPrimary">Ready for Simulation</h4>
+                    <p className="text-xs text-textMuted max-w-sm mt-2 leading-relaxed">
+                      Enter checkout parameters on the left and trigger the simulation. The Groq-powered recovery agent will analyze context, calculate discount strategies, and generate personalized copy.
+                    </p>
+                  </div>
+                ) : (
+                  /* Live Simulation Result with email client previewer */
+                  <div className="space-y-6">
+                    {/* Agent Brain Metrics Card */}
+                    <div className="bg-surface border border-border rounded p-6 space-y-4">
+                      <h4 className="text-xs font-bold uppercase tracking-wider text-textPrimary mb-2 font-mono">Agent Reasoning & Confidence</h4>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="bg-background border border-border rounded p-3 text-center">
+                          <span className="text-[10px] text-textMuted uppercase tracking-wider block mb-1">Selected Strategy</span>
+                          <span className="px-2.5 py-1 bg-accent-dim text-accent rounded-full text-xs font-semibold font-mono uppercase">
+                            {simulatorMutation.data.strategy}
+                          </span>
+                        </div>
+                        <div className="bg-background border border-border rounded p-3 text-center">
+                          <span className="text-[10px] text-textMuted uppercase tracking-wider block mb-1">Confidence Score</span>
+                          <span className="text-lg font-bold text-accent font-mono">
+                            {(simulatorMutation.data.confidenceScore * 100).toFixed(0)}%
+                          </span>
+                        </div>
+                      </div>
+                      <div className="space-y-1.5 font-mono text-[11px]">
+                        <span className="text-textMuted block uppercase text-[9px] tracking-wider font-semibold">Decision Logic Pathway</span>
+                        <p className="bg-background border border-border rounded p-3 text-textSecondary leading-relaxed text-xs">
+                          {simulatorMutation.data.reasoning}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Desktop Email Client Preview Mockup */}
+                    <div className="bg-surface border border-border rounded-lg shadow-lg overflow-hidden flex flex-col">
+                      {/* Window title bar */}
+                      <div className="bg-border/40 px-4 py-3 border-b border-border flex items-center justify-between">
+                        <div className="flex items-center gap-1.5">
+                          <span className="w-2.5 h-2.5 rounded-full bg-[#FF5F56] inline-block" />
+                          <span className="w-2.5 h-2.5 rounded-full bg-[#FFBD2E] inline-block" />
+                          <span className="w-2.5 h-2.5 rounded-full bg-[#27C93F] inline-block" />
+                        </div>
+                        <span className="text-[10px] font-mono text-textMuted tracking-wider uppercase">Recovery Email Preview</span>
+                        <div className="w-10" />
+                      </div>
+
+                      {/* Email headers */}
+                      <div className="p-4 border-b border-border bg-background/50 space-y-1.5 text-xs font-mono">
+                        <div className="flex">
+                          <span className="text-textMuted w-16">From:</span>
+                          <span className="text-textPrimary font-semibold">RecoverAI Intelligent Agent &lt;agent@shop.com&gt;</span>
+                        </div>
+                        <div className="flex">
+                          <span className="text-textMuted w-16">To:</span>
+                          <span className="text-textPrimary">{email}</span>
+                        </div>
+                        <div className="flex flex-wrap">
+                          <span className="text-textMuted w-16">Subject:</span>
+                          <span className="text-accent font-semibold flex-1">Don't lose your {productName || "cart items"}!</span>
+                        </div>
+                      </div>
+
+                      {/* Email Body */}
+                      <div className="p-6 bg-background text-textPrimary min-h-[180px] flex flex-col justify-between">
+                        <div className="text-xs space-y-3 whitespace-pre-wrap leading-relaxed font-sans text-textSecondary">
+                          {simulatorMutation.data.emailCopy}
+                        </div>
+
+                        {/* CTA button mockup */}
+                        <div className="mt-8 text-center">
+                          <button
+                            type="button"
+                            className="bg-accent text-background px-6 py-2.5 rounded font-bold uppercase tracking-wider text-[11px] hover:bg-accent/90 transition-all shadow-md"
+                          >
+                            Return to Checkout (₹{parseFloat(cartValue || "0").toLocaleString("en-IN")})
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
           )}
 
           {activeTab === "interventions" && (
