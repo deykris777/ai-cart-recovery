@@ -474,7 +474,7 @@ export default function Dashboard() {
                             onChange={(e) => setEmail(e.target.value)}
                             required
                             disabled={isAutoSimulating}
-                            className="w-full bg-background border border-border rounded px-8 py-2 text-textPrimary focus:outline-none focus:border-accent text-xs disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="w-full bg-background border border-border rounded pl-8 pr-3 py-2 text-textPrimary focus:outline-none focus:border-accent text-xs disabled:opacity-50 disabled:cursor-not-allowed"
                           />
                         </div>
                       </div>
@@ -492,7 +492,7 @@ export default function Dashboard() {
                               onChange={(e) => setCartValue(e.target.value)}
                               required
                               disabled={isAutoSimulating}
-                              className="w-full bg-background border border-border rounded px-8 py-2 text-textPrimary focus:outline-none focus:border-accent text-xs disabled:opacity-50 disabled:cursor-not-allowed"
+                              className="w-full bg-background border border-border rounded pl-8 pr-3 py-2 text-textPrimary focus:outline-none focus:border-accent text-xs disabled:opacity-50 disabled:cursor-not-allowed"
                             />
                           </div>
                         </div>
@@ -529,7 +529,7 @@ export default function Dashboard() {
                             onChange={(e) => setProductName(e.target.value)}
                             required
                             disabled={isAutoSimulating}
-                            className="w-full bg-background border border-border rounded px-8 py-2 text-textPrimary focus:outline-none focus:border-accent text-xs disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="w-full bg-background border border-border rounded pl-8 pr-3 py-2 text-textPrimary focus:outline-none focus:border-accent text-xs disabled:opacity-50 disabled:cursor-not-allowed"
                           />
                         </div>
                       </div>
