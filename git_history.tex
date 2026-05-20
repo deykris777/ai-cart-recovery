@@ -1,0 +1,43 @@
+\documentclass[11pt, a4paper]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+
+\title{Git Commit History}
+\author{RecoverAI}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\section*{Introduction}
+The commit history tells the story of the project's evolution. Atomic commits with meaningful messages demonstrate engineering discipline and a clear progression from prototype to production. This document presents the complete history of architectural iterations, bug fixes, and feature additions.
+
+\section*{Commit Log}
+
+\begin{itemize}
+    \item \textbf{2026-05-20}: docs: add mandatory hackathon submission documentation
+    \item \textbf{2026-05-20}: fix: update frontend API baseURL so that it works seamlessly without Vercel deployment
+    \item \textbf{2026-05-20}: fix: change api-server start script to use tsx for native TS execution on Render
+    \item \textbf{2026-05-20}: fix: add .js extension for ESM imports in db package to fix Render deploy error
+    \item \textbf{2026-05-20}: fix: disable strict type checking in api-server for seamless Render builds
+    \item \textbf{2026-05-20}: fix: add build script to api-server for Render deployment
+    \item \textbf{2026-05-20}: feat: enhance recovery simulator with live email dispatch, polished UX, and detailed email templates
+    \item \textbf{2026-05-20}: style: change default fonts to sans-serif
+    \item \textbf{2026-05-20}: design: increase main header font size and add pulsing neon indicator to 'Live updates' tag
+    \item \textbf{2026-05-20}: design: move agent simulator to a dedicated full-screen playground tab with interactive email client previewer
+    \item \textbf{2026-05-20}: feat: add light and dark mode theme switcher
+    \item \textbf{2026-05-20}: fix: adjust input fields padding to prevent overlapping number spinner
+    \item \textbf{2026-05-20}: fix: align docs with actual Groq stack, clean up tracked files
+    \item \textbf{2026-05-20}: feat: implement responsive INR currency conversion and auto-pilot traffic simulation
+    \item \textbf{2026-05-20}: fix: correct sender email logging variable
+    \item \textbf{2026-05-20}: fix: make formatTime robust against invalid locales or timezones to prevent Live Agent Reasoning sidebar from crashing
+    \item \textbf{2026-05-20}: diagnostics: add HTTP request logger and verbose browser console logs
+    \item \textbf{2026-05-19}: chore: add railway.toml configuration
+    \item \textbf{2026-05-19}: chore: add render.yaml deployment blueprint
+    \item \textbf{2026-05-19}: Update docs, dashboard UI, gitignore, and package config
+    \item \textbf{2026-05-08}: docs: add comprehensive product, technical, and architectural decision docs
+    \item \textbf{2026-05-08}: feat: redesign dashboard with premium glassmorphism and realistic simulator
+    \item \textbf{2026-05-08}: init: base backend setup and agent routing
+\end{itemize}
+
+\end{document}

@@ -1,0 +1,31 @@
+\documentclass[11pt, a4paper]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+\usepackage{tabularx}
+\usepackage{booktabs}
+
+\title{Architectural Decision Log}
+\author{RecoverAI}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\section*{Introduction}
+A running list of architectural and engineering decisions made during the build: ``We considered X, chose Y, because Z.''
+
+\section*{Decision Log}
+
+\begin{itemize}
+    \item \textbf{Monorepo vs. Multi-repo:} We considered using separate repositories for the frontend and backend. We chose to use a unified npm workspace (Monorepo), because it allows for shared types (Zod schemas), isolated dependencies, and cleaner continuous deployment processes while keeping everything in one GitHub repository.
+    
+    \item \textbf{React + Vite vs. Plain HTML/JS:} We considered serving static HTML files from Express. We chose a Vite + React frontend architecture, because it provides a vastly superior developer experience, hot-reloading, component-driven UI, and enables a premium interactive demo experience using TailwindCSS and Recharts.
+    
+    \item \textbf{Groq LLaMA-3 vs. OpenAI GPT-4:} We considered standard LLMs for the recovery agent. We chose Groq LLaMA-3 (70B), because Groq's LPU architecture provides ultra-fast, sub-second inference. This ensures the AI reasoning phase doesn't block the UI for 10+ seconds, allowing for real-time recovery simulations.
+    
+    \item \textbf{Render Native TS Execution vs. Global Build Step:} We considered configuring complex \texttt{tsc} build steps for all internal workspaces (like \texttt{@workspace/db}). We chose to use \texttt{tsx} for production Node execution on Render, because the database module uses pure TypeScript. Changing the start script to \texttt{tsx src/server.ts} allowed seamless execution of the monorepo TS files without a complex global build step, bypassing ESM resolution errors.
+    
+    \item \textbf{Dynamic API Routing vs. Hardcoded ENV Variables:} We considered hardcoding \texttt{VITE\_API\_URL} for production. We chose to use a dynamic API Base URL (\texttt{baseURL: ""}) in the Axios client, because the Render deployment serves the frontend directly from the backend domain. This allows the frontend to dynamically hit the backend origin without strict environment variables, preventing CORS and missing-URL errors.
+\end{itemize}
+
+\end{document}
