@@ -134,6 +134,8 @@ export default function Dashboard() {
   const [cartValue, setCartValue] = useState("2500.00");
   const [productName, setProductName] = useState("Premium Leather Boots");
   const [customerType, setCustomerType] = useState("Gold");
+  const [frictionSignal, setFrictionSignal] = useState("Price Hesitation");
+  const [isRedirecting, setIsRedirecting] = useState(false);
 
   const handleSimulate = (e: React.FormEvent) => {
     e.preventDefault();
@@ -885,6 +887,27 @@ export default function Dashboard() {
                     </div>
                   </div>
 
+                  <div>
+                    <label className="block text-textMuted font-medium mb-1.5 font-mono uppercase tracking-wider text-[9px]">
+                      Friction Signal
+                    </label>
+                    <div className="relative">
+                      <Zap size={12} className="absolute left-2.5 top-2.5 text-textMuted" />
+                      <select
+                        value={frictionSignal}
+                        onChange={(e) => setFrictionSignal(e.target.value)}
+                        disabled={isAutoSimulating}
+                        className="w-full bg-background border border-border rounded pl-8 pr-2 py-2 text-textPrimary focus:outline-none focus:border-accent text-xs appearance-none disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <option>Price Hesitation</option>
+                        <option>Delivery Concern</option>
+                        <option>Coupon Search</option>
+                        <option>Trust Issue</option>
+                        <option>Size Uncertainty</option>
+                      </select>
+                    </div>
+                  </div>
+
                   <button
                     type="submit"
                     disabled={simulatorMutation.isPending || isAutoSimulating}
@@ -906,94 +929,198 @@ export default function Dashboard() {
               </div>
 
               {/* Right Column: Output & Previewer */}
-              <div className="lg:col-span-7 space-y-6">
-                {!simulatorMutation.data ? (
-                  /* Empty State */
-                  <div className="bg-surface border border-dashed border-border rounded-lg p-12 flex flex-col items-center justify-center text-center h-[340px] transition-all">
-                    <div className="h-12 w-12 rounded-full bg-accent-dim flex items-center justify-center text-accent mb-4">
-                      <Zap size={20} className="animate-pulse" />
+              <div className="lg:col-span-7">
+                <div className="bg-surface border border-border rounded-lg flex flex-col h-full min-h-[600px] overflow-hidden relative">
+                  {!simulatorMutation.data && !simulatorMutation.isPending ? (
+                    <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-8 z-10 bg-surface">
+                      <div className="w-16 h-16 rounded-full bg-accent/10 border border-accent/20 flex items-center justify-center mb-4">
+                        <Zap size={24} className="text-accent animate-pulse" />
+                      </div>
+                      <h3 className="text-lg font-medium text-textPrimary mb-2">Decision Pipeline Standby</h3>
+                      <p className="text-sm text-textMuted max-w-sm">
+                        Configure the parameters on the left and initialize the pipeline to visualize the AI reasoning process in real-time.
+                      </p>
                     </div>
-                    <h4 className="text-xs font-bold uppercase tracking-wider text-textPrimary">Ready for Simulation</h4>
-                    <p className="text-xs text-textMuted max-w-sm mt-2 leading-relaxed">
-                      Enter checkout parameters on the left and trigger the simulation. The Groq-powered recovery agent will analyze context, calculate discount strategies, and generate personalized copy.
-                    </p>
-                  </div>
-                ) : (
-                  /* Live Simulation Result with email client previewer */
-                  <div className="space-y-6">
-                    {/* Agent Brain Metrics Card */}
-                    <div className="bg-surface border border-border rounded p-6 space-y-4">
-                      <h4 className="text-xs font-bold uppercase tracking-wider text-textPrimary mb-2 font-mono">Agent Reasoning & Confidence</h4>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="bg-background border border-border rounded p-3 text-center">
-                          <span className="text-[10px] text-textMuted uppercase tracking-wider block mb-1">Selected Strategy</span>
-                          <span className="px-2.5 py-1 bg-accent-dim text-accent rounded-full text-xs font-semibold font-mono uppercase">
-                            {simulatorMutation.data.strategy}
-                          </span>
-                        </div>
-                        <div className="bg-background border border-border rounded p-3 text-center">
-                          <span className="text-[10px] text-textMuted uppercase tracking-wider block mb-1">Confidence Score</span>
-                          <span className="text-lg font-bold text-accent font-mono">
-                            {(simulatorMutation.data.confidenceScore * 100).toFixed(0)}%
-                          </span>
-                        </div>
+                  ) : simulatorMutation.isPending ? (
+                    <div className="absolute inset-0 bg-surface/80 backdrop-blur-sm flex flex-col items-center justify-center z-20">
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="w-2 h-2 rounded-full bg-accent animate-bounce"></div>
+                        <div className="w-2 h-2 rounded-full bg-blue-500 animate-bounce" style={{ animationDelay: "0.1s" }}></div>
+                        <div className="w-2 h-2 rounded-full bg-emerald-500 animate-bounce" style={{ animationDelay: "0.2s" }}></div>
                       </div>
-                      <div className="space-y-1.5 font-mono text-[11px]">
-                        <span className="text-textMuted block uppercase text-[9px] tracking-wider font-semibold">Decision Logic Pathway</span>
-                        <p className="bg-background border border-border rounded p-3 text-textSecondary leading-relaxed text-xs">
-                          {simulatorMutation.data.reasoning}
-                        </p>
+                      <p className="text-sm font-mono text-textMuted">Analyzing cart context & computing trajectory...</p>
+                    </div>
+                  ) : (
+                    <div className="flex-col h-full z-10 bg-background p-4 lg:p-6 overflow-y-auto">
+                      <div className="flex items-center gap-2 mb-6 border-b border-border pb-4">
+                        <Zap size={18} className="text-accent" />
+                        <h3 className="text-sm font-bold tracking-wide uppercase text-textPrimary">Recovery Decision Pipeline</h3>
+                      </div>
+
+                      <div className="space-y-6 relative before:pointer-events-none before:absolute before:inset-0 before:ml-5 before:-translate-x-px before:h-full before:w-0.5 before:bg-gradient-to-b before:from-border before:to-transparent">
+                        
+                        {/* Step 1: Friction & Context */}
+                        <div className="relative flex items-start gap-4">
+                          <div className="flex items-center justify-center w-10 h-10 rounded-full border border-border bg-surface shadow-lg shrink-0 relative z-10 text-accent font-bold">1</div>
+                          <div className="w-full p-4 rounded-xl border border-border bg-surface shadow-sm">
+                            <div className="flex items-center gap-2 mb-2">
+                              <span className="text-[10px] font-bold uppercase tracking-wider text-textMuted">Friction Detected</span>
+                            </div>
+                            <p className="text-sm text-textPrimary mb-3">
+                              {customerType} customer showing <span className="text-accent">{frictionSignal.toLowerCase()}</span>.
+                            </p>
+                            <div className="flex gap-2 flex-wrap">
+                              <span className="text-[10px] px-2 py-1 rounded bg-background border border-border text-textSecondary font-mono uppercase">
+                                {customerType} TIER
+                              </span>
+                              <span className="text-[10px] px-2 py-1 rounded bg-background border border-border text-textSecondary font-mono uppercase">
+                                ₹{parseFloat(cartValue || "0").toLocaleString("en-IN")} CART
+                              </span>
+                              <span className="text-[10px] px-2 py-1 rounded bg-red-500/10 border border-red-500/20 text-red-400 font-mono uppercase">
+                                {frictionSignal}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Step 2: Strategy Selected */}
+                        <div className="relative flex items-start gap-4">
+                          <div className="flex items-center justify-center w-10 h-10 rounded-full border border-border bg-surface shadow-lg shrink-0 relative z-10 text-blue-400 font-bold">2</div>
+                          <div className="w-full p-4 rounded-xl border border-border bg-surface shadow-sm">
+                            <div className="flex items-center gap-2 mb-3">
+                              <span className="text-[10px] font-bold uppercase tracking-wider text-textMuted">Strategy Selected</span>
+                            </div>
+                            <div className="mb-3">
+                              <span 
+                                className="px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider border"
+                                style={{
+                                  backgroundColor: `${getStrategyColor(simulatorMutation.data?.strategy || "")}20`,
+                                  color: getStrategyColor(simulatorMutation.data?.strategy || ""),
+                                  borderColor: `${getStrategyColor(simulatorMutation.data?.strategy || "")}40`,
+                                }}
+                              >
+                                {simulatorMutation.data?.strategy}
+                              </span>
+                            </div>
+                            <div className="bg-background rounded p-3 border-l-2 border-blue-500/50">
+                              <p className="text-xs text-textSecondary leading-relaxed">
+                                {simulatorMutation.data?.reasoning}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Step 3: Confidence & Status */}
+                        <div className="relative flex items-start gap-4">
+                          <div className="flex items-center justify-center w-10 h-10 rounded-full border border-border bg-surface shadow-lg shrink-0 relative z-10 text-emerald-400 font-bold">3</div>
+                          <div className="w-full p-4 rounded-xl border border-border bg-surface shadow-sm">
+                            <div className="flex items-center gap-2 mb-3">
+                              <span className="text-[10px] font-bold uppercase tracking-wider text-textMuted">System Status</span>
+                            </div>
+                            <div className="space-y-4">
+                              <div>
+                                <div className="flex justify-between text-xs mb-1.5">
+                                  <span className="text-textSecondary font-mono uppercase tracking-wider text-[10px]">AI Confidence</span>
+                                  <span className="text-textPrimary font-bold font-mono">
+                                    {((simulatorMutation.data?.confidenceScore || 0) * 100).toFixed(0)}%
+                                  </span>
+                                </div>
+                                <div className="h-1.5 w-full bg-background rounded-full overflow-hidden border border-border">
+                                  <div 
+                                    className="h-full bg-gradient-to-r from-emerald-500 to-emerald-300 transition-all duration-1000" 
+                                    style={{ width: `${Math.max(10, (simulatorMutation.data?.confidenceScore || 0) * 100)}%` }}
+                                  ></div>
+                                </div>
+                              </div>
+                              <div className="grid grid-cols-2 gap-3 text-xs">
+                                <div className="bg-background rounded border border-border p-2">
+                                  <span className="block text-textMuted mb-1" style={{ fontSize: "9px", textTransform: "uppercase", letterSpacing: "0.5px" }}>Decision Source</span>
+                                  <span className="font-mono text-accent font-semibold">Hybrid (Rules + LLM)</span>
+                                </div>
+                                <div className="bg-background rounded border border-border p-2">
+                                  <span className="block text-textMuted mb-1" style={{ fontSize: "9px", textTransform: "uppercase", letterSpacing: "0.5px" }}>Fallback Triggered</span>
+                                  <span className="font-mono text-emerald-400 font-semibold">No</span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Step 4: Generation & Outcome */}
+                        <div className="relative flex items-start gap-4">
+                          <div className="flex items-center justify-center w-10 h-10 rounded-full border border-border bg-surface shadow-lg shrink-0 relative z-10 text-purple-400 font-bold">4</div>
+                          <div className="w-full p-0 rounded-xl border border-border bg-surface shadow-sm overflow-hidden flex flex-col">
+                            <div className="bg-background p-3 border-b border-border flex justify-between items-center">
+                              <span className="text-[10px] font-bold uppercase tracking-wider text-textMuted">Generated Payload</span>
+                              <span className={`text-[9px] px-2 py-0.5 rounded font-mono uppercase tracking-wider font-semibold ${
+                                (simulatorMutation.data as any)?.emailSent
+                                  ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                                  : "bg-purple-500/10 text-purple-400 border border-purple-500/20"
+                              }`}>
+                                {(simulatorMutation.data as any)?.emailSent ? "Payload Dispatched to Inbox" : "Ready to Send"}
+                              </span>
+                            </div>
+                            
+                            <div className="p-4">
+                              <div className="mb-3">
+                                <span className="text-[9px] text-textMuted uppercase font-mono tracking-wider font-semibold">Subject</span>
+                                <p className="text-sm font-bold text-textPrimary mt-0.5">
+                                  Don't lose your {productName || "cart items"}!
+                                </p>
+                              </div>
+                              <div className="bg-background p-4 rounded border border-border relative">
+                                <div className="absolute top-2.5 right-2.5 flex gap-1.5">
+                                  <span className="w-2 h-2 rounded-full bg-border"></span>
+                                  <span className="w-2 h-2 rounded-full bg-border"></span>
+                                  <span className="w-2 h-2 rounded-full bg-border"></span>
+                                </div>
+                                <div className="mt-2 text-textSecondary text-xs whitespace-pre-wrap leading-relaxed font-sans">
+                                  {simulatorMutation.data?.emailCopy}
+                                </div>
+                                <div className="mt-4 pt-4 border-t border-border/50 text-center">
+                                  <button 
+                                    onClick={() => {
+                                      setIsRedirecting(true);
+                                      setTimeout(() => setIsRedirecting(false), 2000);
+                                    }}
+                                    disabled={isRedirecting}
+                                    type="button"
+                                    className={`relative z-10 text-background px-6 py-2 rounded font-bold uppercase tracking-wider text-[10px] transition-all shadow-md w-full sm:w-auto flex items-center justify-center gap-2 mx-auto ${
+                                      isRedirecting ? "bg-accent/70 cursor-not-allowed" : "bg-accent hover:bg-accent/90"
+                                    }`}
+                                  >
+                                    {isRedirecting ? (
+                                      <>
+                                        <span className="w-3 h-3 border-2 border-background border-t-transparent rounded-full animate-spin"></span>
+                                        Redirecting to cart...
+                                      </>
+                                    ) : (
+                                      `Return to Checkout (₹${parseFloat(cartValue || "0").toLocaleString("en-IN")})`
+                                    )}
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="bg-emerald-500/5 p-3 border-t border-emerald-500/10 grid grid-cols-2 gap-2 divide-x divide-border">
+                              <div className="text-center px-2">
+                                <span className="block text-[9px] text-textMuted uppercase tracking-wider font-semibold mb-1 font-mono">Expected Outcome</span>
+                                <span className="text-sm font-bold text-emerald-400">High Conv. Prob.</span>
+                              </div>
+                              <div className="text-center px-2">
+                                <span className="block text-[9px] text-textMuted uppercase tracking-wider font-semibold mb-1 font-mono">Margin Impact</span>
+                                <span className={`text-sm font-bold ${(simulatorMutation.data?.strategy || "").toLowerCase() === 'discount' ? 'text-yellow-400' : 'text-emerald-400'}`}>
+                                  {(simulatorMutation.data?.strategy || "").toLowerCase() === 'discount' ? '-10% Discount' : 'Preserved (0% off)'}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
                       </div>
                     </div>
-
-                    {/* Desktop Email Client Preview Mockup */}
-                    <div className="bg-surface border border-border rounded-lg shadow-lg overflow-hidden flex flex-col">
-                      {/* Window title bar */}
-                      <div className="bg-border/40 px-4 py-3 border-b border-border flex items-center justify-between">
-                        <div className="flex items-center gap-1.5">
-                          <span className="w-2.5 h-2.5 rounded-full bg-[#FF5F56] inline-block" />
-                          <span className="w-2.5 h-2.5 rounded-full bg-[#FFBD2E] inline-block" />
-                          <span className="w-2.5 h-2.5 rounded-full bg-[#27C93F] inline-block" />
-                        </div>
-                        <span className="text-[10px] font-mono text-textMuted tracking-wider uppercase">Recovery Email Preview</span>
-                        <div className="w-10" />
-                      </div>
-
-                      {/* Email headers */}
-                      <div className="p-4 border-b border-border bg-background/50 space-y-1.5 text-xs font-mono">
-                        <div className="flex">
-                          <span className="text-textMuted w-16">From:</span>
-                          <span className="text-textPrimary font-semibold">RecoverAI Intelligent Agent &lt;agent@shop.com&gt;</span>
-                        </div>
-                        <div className="flex">
-                          <span className="text-textMuted w-16">To:</span>
-                          <span className="text-textPrimary">{email}</span>
-                        </div>
-                        <div className="flex flex-wrap">
-                          <span className="text-textMuted w-16">Subject:</span>
-                          <span className="text-accent font-semibold flex-1">Don't lose your {productName || "cart items"}!</span>
-                        </div>
-                      </div>
-
-                      {/* Email Body */}
-                      <div className="p-6 bg-background text-textPrimary min-h-[180px] flex flex-col justify-between">
-                        <div className="text-xs space-y-3 whitespace-pre-wrap leading-relaxed font-sans text-textSecondary">
-                          {simulatorMutation.data.emailCopy}
-                        </div>
-
-                        {/* CTA button mockup */}
-                        <div className="mt-8 text-center">
-                          <button
-                            type="button"
-                            className="bg-accent text-background px-6 py-2.5 rounded font-bold uppercase tracking-wider text-[11px] hover:bg-accent/90 transition-all shadow-md"
-                          >
-                            Return to Checkout (₹{parseFloat(cartValue || "0").toLocaleString("en-IN")})
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
             </div>
           )}

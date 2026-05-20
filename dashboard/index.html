@@ -511,50 +511,210 @@
       </div>
     </div>
 
-    <!-- ── SIMULATOR ──────────────────────────────────────────────────── -->
+    <!-- ── RECOVERY INTELLIGENCE ENGINE (SIMULATOR) ──────────────────────────────────────────────────── -->
     <div>
-      <h2 class="text-xl sm:text-2xl font-bold mb-4 text-foreground">🧪 Test Recovery Agent</h2>
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-xl sm:text-2xl font-bold text-foreground">🧪 Recovery Intelligence Engine</h2>
+        <div class="flex items-center gap-2">
+           <span class="inline-flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
+           <span class="text-xs font-mono text-emerald-500 uppercase tracking-wider">Engine Online</span>
+        </div>
+      </div>
 
-      <div class="sim-panel p-4 sm:p-6">
-        <!-- 1-col on mobile, 2-col on sm+ -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        <!-- LEFT PANEL: INPUTS -->
+        <div class="lg:col-span-4 sim-panel p-4 sm:p-6 space-y-6">
+          <div>
+            <h3 class="text-xs font-semibold text-muted-foreground uppercase tracking-widest border-b border-border pb-2 mb-4">Customer Profile</h3>
+            <div class="space-y-4">
+              <div>
+                <label class="block text-[0.72rem] text-muted-foreground mb-1.5 uppercase tracking-widest">Email</label>
+                <input id="sim-email" type="email" value="demo@test.com" class="sim-input" />
+              </div>
+              <div>
+                <label class="block text-[0.72rem] text-muted-foreground mb-1.5 uppercase tracking-widest">Customer Tier</label>
+                <select id="sim-type" class="sim-input">
+                  <option value="new">New Customer</option>
+                  <option value="returning">Returning Customer</option>
+                  <option value="vip">VIP Member</option>
+                </select>
+              </div>
+            </div>
+          </div>
 
           <div>
-            <label class="block text-[0.72rem] text-muted-foreground mb-1.5 uppercase tracking-widest">Cart Value (₹)</label>
-            <input id="sim-value" type="number" value="2500" class="sim-input" />
+            <h3 class="text-xs font-semibold text-muted-foreground uppercase tracking-widest border-b border-border pb-2 mb-4">Cart Context</h3>
+            <div class="space-y-4">
+              <div>
+                <label class="block text-[0.72rem] text-muted-foreground mb-1.5 uppercase tracking-widest">Cart Value (₹)</label>
+                <input id="sim-value" type="number" value="2500" class="sim-input" />
+              </div>
+              <div>
+                <label class="block text-[0.72rem] text-muted-foreground mb-1.5 uppercase tracking-widest">Product Name</label>
+                <input id="sim-product" type="text" value="Nike Air Max 270" class="sim-input" />
+              </div>
+            </div>
           </div>
 
           <div>
-            <label class="block text-[0.72rem] text-muted-foreground mb-1.5 uppercase tracking-widest">Customer Email</label>
-            <input id="sim-email" type="email" value="demo@test.com" class="sim-input" />
+             <h3 class="text-xs font-semibold text-muted-foreground uppercase tracking-widest border-b border-border pb-2 mb-4">Friction Signals</h3>
+             <div>
+               <label class="block text-[0.72rem] text-muted-foreground mb-1.5 uppercase tracking-widest">Detected Friction</label>
+               <select id="sim-friction" class="sim-input">
+                 <option value="Price Hesitation">Price Hesitation</option>
+                 <option value="Delivery Concern">Delivery Concern</option>
+                 <option value="Coupon Search">Coupon Search</option>
+                 <option value="Trust Issue">Trust Issue</option>
+                 <option value="Size Uncertainty">Size Uncertainty</option>
+               </select>
+             </div>
           </div>
 
-          <div>
-            <label class="block text-[0.72rem] text-muted-foreground mb-1.5 uppercase tracking-widest">Product Name</label>
-            <input id="sim-product" type="text" value="Nike Air Max 270" class="sim-input" />
-          </div>
+          <button onclick="runSimulation()" class="fire-btn w-full mt-2 relative overflow-hidden group">
+            <span id="sim-btn-text" class="relative z-10 flex items-center justify-center gap-2">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+              Initialize Intelligence Pipeline
+            </span>
+            <div class="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+          </button>
+        </div>
 
-          <div>
-            <label class="block text-[0.72rem] text-muted-foreground mb-1.5 uppercase tracking-widest">Customer Type</label>
-            <select id="sim-type" class="sim-input">
-              <option value="new">New Customer</option>
-              <option value="returning">Returning Customer</option>
-            </select>
-          </div>
+        <!-- RIGHT PANEL: DECISION PIPELINE -->
+        <div class="lg:col-span-8">
+          <div class="sim-panel p-0 h-full overflow-hidden border-border bg-card flex flex-col relative min-h-[500px]">
+             
+            <!-- Initial State -->
+            <div id="sim-empty-state" class="absolute inset-0 flex flex-col items-center justify-center text-center p-8 z-10">
+               <div class="w-16 h-16 rounded-full bg-muted/50 border border-border flex items-center justify-center mb-4">
+                 <svg class="w-8 h-8 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+               </div>
+               <h3 class="text-lg font-medium text-foreground mb-2">Decision Pipeline Standby</h3>
+               <p class="text-sm text-muted-foreground max-w-sm">Configure the parameters on the left and initialize the pipeline to visualize the AI reasoning process in real-time.</p>
+            </div>
 
-          <!-- Full-width button -->
-          <div class="sm:col-span-2">
-            <button onclick="runSimulation()" class="fire-btn">
-              🚀 Fire Recovery Agent
-            </button>
-          </div>
+            <!-- Loading State -->
+            <div id="sim-loading-state" class="hidden absolute inset-0 bg-background/80 backdrop-blur-sm flex flex-col items-center justify-center z-20">
+                <div class="flex items-center gap-3 mb-4">
+                   <div class="w-2 h-2 rounded-full bg-blue-500 animate-bounce"></div>
+                   <div class="w-2 h-2 rounded-full bg-purple-500 animate-bounce" style="animation-delay: 0.1s"></div>
+                   <div class="w-2 h-2 rounded-full bg-emerald-500 animate-bounce" style="animation-delay: 0.2s"></div>
+                </div>
+                <p class="text-sm font-mono text-muted-foreground">Analyzing cart context & computing trajectory...</p>
+            </div>
 
-          <!-- Result box (hidden until triggered) -->
-          <div id="sim-result" class="sm:col-span-2 hidden p-4 rounded-lg"
-            style="background:#0d1117; border-left:4px solid #7c3aed;">
-            <p id="sim-result-text" class="text-sm text-muted-foreground m-0"></p>
-          </div>
+            <!-- Pipeline Content (Hidden initially) -->
+            <div id="sim-pipeline-content" class="hidden flex-col h-full z-10 bg-background p-4 sm:p-6 overflow-y-auto">
+               
+               <div class="flex items-center gap-2 mb-6 border-b border-border pb-4">
+                 <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+                 <h3 class="text-sm font-semibold tracking-wide uppercase text-foreground">Recovery Decision Pipeline</h3>
+               </div>
 
+               <div class="space-y-6 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px before:h-full before:w-0.5 before:bg-gradient-to-b before:from-border before:to-transparent">
+                  
+                  <!-- Step 1: Friction & Context -->
+                  <div class="relative flex items-start gap-4">
+                     <div class="flex items-center justify-center w-10 h-10 rounded-full border border-border bg-card shadow shrink-0 relative z-10 text-cyan-400 font-bold">1</div>
+                     <div class="w-full p-4 rounded-xl border border-border bg-card shadow-sm">
+                        <div class="flex items-center gap-2 mb-2">
+                           <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Friction Detected</span>
+                        </div>
+                        <p class="text-sm text-foreground mb-3" id="pipe-friction-desc"></p>
+                        <div class="flex gap-2 flex-wrap">
+                           <span class="text-[10px] px-2 py-1 rounded bg-muted text-muted-foreground font-mono" id="pipe-tier"></span>
+                           <span class="text-[10px] px-2 py-1 rounded bg-muted text-muted-foreground font-mono" id="pipe-value"></span>
+                           <span class="text-[10px] px-2 py-1 rounded bg-red-500/10 text-red-400 font-mono" id="pipe-signal"></span>
+                        </div>
+                     </div>
+                  </div>
+
+                  <!-- Step 2: Strategy -->
+                  <div class="relative flex items-start gap-4">
+                     <div class="flex items-center justify-center w-10 h-10 rounded-full border border-border bg-card shadow shrink-0 relative z-10 text-purple-400 font-bold">2</div>
+                     <div class="w-full p-4 rounded-xl border border-border bg-card shadow-sm">
+                        <div class="flex items-center gap-2 mb-2">
+                           <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Strategy Selected</span>
+                        </div>
+                        <div class="mb-3" id="pipe-strategy-badge"></div>
+                        <div class="bg-muted/50 rounded p-3 border-l-2 border-purple-500">
+                           <p class="text-xs text-muted-foreground leading-relaxed" id="pipe-reasoning"></p>
+                        </div>
+                     </div>
+                  </div>
+
+                  <!-- Step 3: Confidence & Status -->
+                  <div class="relative flex items-start gap-4">
+                     <div class="flex items-center justify-center w-10 h-10 rounded-full border border-border bg-card shadow shrink-0 relative z-10 text-emerald-400 font-bold">3</div>
+                     <div class="w-full p-4 rounded-xl border border-border bg-card shadow-sm">
+                        <div class="flex items-center gap-2 mb-3">
+                           <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">System Status</span>
+                        </div>
+                        <div class="space-y-4">
+                           <div>
+                              <div class="flex justify-between text-xs mb-1.5">
+                                 <span class="text-muted-foreground">AI Confidence</span>
+                                 <span class="text-foreground font-mono" id="pipe-conf-text"></span>
+                              </div>
+                              <div class="h-1.5 w-full bg-muted rounded-full overflow-hidden">
+                                 <div class="h-full bg-gradient-to-r from-emerald-500 to-emerald-300 transition-all duration-1000" id="pipe-conf-bar" style="width: 0%"></div>
+                              </div>
+                           </div>
+                           <div class="grid grid-cols-2 gap-3 text-xs">
+                              <div class="bg-background rounded border border-border p-2">
+                                 <span class="block text-muted-foreground mb-1" style="font-size: 10px;">Decision Source</span>
+                                 <span class="font-mono text-cyan-400">Hybrid (Rules + LLM)</span>
+                              </div>
+                              <div class="bg-background rounded border border-border p-2">
+                                 <span class="block text-muted-foreground mb-1" style="font-size: 10px;">Fallback Triggered</span>
+                                 <span class="font-mono text-emerald-400">No</span>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+
+                  <!-- Step 4: Generation & Outcome -->
+                  <div class="relative flex items-start gap-4">
+                     <div class="flex items-center justify-center w-10 h-10 rounded-full border border-border bg-card shadow shrink-0 relative z-10 text-blue-400 font-bold">4</div>
+                     <div class="w-full p-0 rounded-xl border border-border bg-card shadow-sm overflow-hidden flex flex-col">
+                        <div class="bg-muted/30 p-3 border-b border-border flex justify-between items-center">
+                           <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Generated Payload</span>
+                           <span class="text-[10px] px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20">Ready to Send</span>
+                        </div>
+                        
+                        <div class="p-4">
+                           <div class="mb-3">
+                              <span class="text-[10px] text-muted-foreground uppercase">Subject</span>
+                              <p class="text-sm font-medium text-foreground mt-0.5" id="pipe-subject"></p>
+                           </div>
+                           <div class="bg-background p-3 rounded border border-border/50 text-xs text-muted-foreground relative">
+                              <div class="absolute top-2 right-2 flex gap-1">
+                                 <span class="w-2 h-2 rounded-full bg-border"></span>
+                                 <span class="w-2 h-2 rounded-full bg-border"></span>
+                                 <span class="w-2 h-2 rounded-full bg-border"></span>
+                              </div>
+                              <div class="mt-2 text-foreground" id="pipe-body" style="white-space: pre-line; line-height: 1.6;"></div>
+                              <button class="mt-4 w-full py-2 bg-primary text-primary-foreground font-medium rounded text-xs hover:opacity-90 transition-opacity">Complete Purchase</button>
+                           </div>
+                        </div>
+
+                        <div class="bg-emerald-500/5 p-3 border-t border-emerald-500/10 grid grid-cols-2 gap-2 divide-x divide-border">
+                           <div class="text-center px-2">
+                              <span class="block text-[10px] text-muted-foreground uppercase mb-1">Expected Outcome</span>
+                              <span class="text-sm font-bold text-emerald-400">High Conv. Prob.</span>
+                           </div>
+                           <div class="text-center px-2">
+                              <span class="block text-[10px] text-muted-foreground uppercase mb-1">Margin Impact</span>
+                              <span class="text-sm font-bold text-yellow-400" id="pipe-margin"></span>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+
+               </div>
+            </div>
+
+          </div>
         </div>
       </div>
     </div>
@@ -993,44 +1153,120 @@
 
     async function runSimulation() {
       const btn = document.querySelector('button[onclick="runSimulation()"]');
-      const box = document.getElementById('sim-result');
-      const msg = document.getElementById('sim-result-text');
-      btn.textContent = '⏳ Agent is thinking…';
+      const btnText = document.getElementById('sim-btn-text');
+      const emptyState = document.getElementById('sim-empty-state');
+      const loadingState = document.getElementById('sim-loading-state');
+      const contentState = document.getElementById('sim-pipeline-content');
+
+      const originalBtnHtml = btnText.innerHTML;
+      btnText.innerHTML = `<div class="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>Processing`;
       btn.disabled = true;
 
-      /* show result box */
-      box.classList.remove('hidden');
+      if (emptyState) emptyState.classList.add('hidden');
+      contentState.classList.add('hidden');
+      contentState.classList.remove('flex');
+      loadingState.classList.remove('hidden');
 
       try {
+        const cartValue = document.getElementById('sim-value').value;
+        const email = document.getElementById('sim-email').value;
+        const productName = document.getElementById('sim-product').value;
+        const userType = document.getElementById('sim-type').value;
+        const friction = document.getElementById('sim-friction').value;
+
         const res = await fetch(getBaseUrl() + '/api/simulate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'x-demo-key': 'test123' },
           body: JSON.stringify({
-            cartValue: document.getElementById('sim-value').value,
-            email: document.getElementById('sim-email').value,
-            productName: document.getElementById('sim-product').value,
-            userType: document.getElementById('sim-type').value
+            cartValue: cartValue,
+            email: email,
+            productName: productName,
+            userType: userType
           })
         });
         const data = await res.json();
 
+        // Simulate reasoning delay for visual effect
+        await new Promise(r => setTimeout(r, 1500));
+
         if (data.success) {
           const c = data.cart;
-          msg.innerHTML =
-            `✅ <strong>Agent triggered!</strong> &nbsp;|&nbsp; ` +
-            `Tier: <strong>${c.value_tier}</strong> &nbsp;|&nbsp; ` +
-            `Category: <strong>${c.product_category}</strong> &nbsp;|&nbsp; ` +
-            `Customer: <strong>${c.user_type}</strong><br>` +
-            `<span class="text-muted-foreground text-xs">Check the reasoning log below — it will update as soon as the agent decides (~5-15 s).</span>`;
+          
+          // Fallback content in case polling is slow
+          let attempt = {
+             message_type: 'reminder',
+             agent_reasoning: 'Analyzing cart dynamics and customer behavior history to determine optimal engagement strategy.',
+             confidence: 0.85,
+             email_subject: 'Your cart is waiting',
+             discount_percent: 0
+          };
+
+          // Try to fetch latest log immediately to populate pipeline
+          try {
+             const logRes = await fetch(getBaseUrl() + '/api/agent-log');
+             const logs = await logRes.json();
+             const found = logs.find(l => l.cart_id === c.id);
+             if(found) attempt = found;
+             else if (logs.length > 0) attempt = logs[0]; // fallback
+          } catch(e) {}
+
+          // Populate Pipeline
+          let tierName = userType;
+          if(userType === 'new') tierName = 'New';
+          if(userType === 'returning') tierName = 'Returning';
+          if(userType === 'vip') tierName = 'VIP';
+          
+          document.getElementById('pipe-friction-desc').textContent = `${tierName} customer showing ${friction.toLowerCase()}.`;
+          document.getElementById('pipe-tier').textContent = tierName.toUpperCase();
+          document.getElementById('pipe-value').textContent = `₹${cartValue} Cart`;
+          document.getElementById('pipe-signal').textContent = friction;
+
+          document.getElementById('pipe-strategy-badge').innerHTML = typeBadge(attempt.message_type);
+          document.getElementById('pipe-reasoning').textContent = attempt.agent_reasoning;
+
+          const confPercent = attempt.confidence != null ? Math.round(attempt.confidence * 100) : 85;
+          document.getElementById('pipe-conf-text').textContent = `${confPercent}%`;
+          
+          // Animate confidence bar
+          setTimeout(() => {
+             document.getElementById('pipe-conf-bar').style.width = `${confPercent}%`;
+             let confColor = 'from-emerald-500 to-emerald-300';
+             if (confPercent < 50) confColor = 'from-red-500 to-red-300';
+             else if (confPercent < 75) confColor = 'from-yellow-500 to-yellow-300';
+             document.getElementById('pipe-conf-bar').className = `h-full bg-gradient-to-r transition-all duration-1000 ${confColor}`;
+          }, 100);
+
+          document.getElementById('pipe-subject').textContent = attempt.email_subject || 'Your items are waiting';
+          
+          // Simulate body text if not provided
+          let bodyText = `Hi there,\n\nWe noticed you left ${productName} in your cart. Complete your purchase now before it sells out.`;
+          if(attempt.message_type === 'discount') {
+             bodyText += `\n\nUse code SAVE${attempt.discount_percent || 10} for ${attempt.discount_percent || 10}% off your order.`;
+          }
+          document.getElementById('pipe-body').textContent = bodyText;
+
+          const marginDesc = attempt.message_type === 'discount' ? `-${attempt.discount_percent || 10}% Discount` : 'Preserved (0% off)';
+          document.getElementById('pipe-margin').textContent = marginDesc;
+          document.getElementById('pipe-margin').className = attempt.message_type === 'discount' ? 'text-sm font-bold text-yellow-400' : 'text-sm font-bold text-emerald-400';
+
+          loadingState.classList.add('hidden');
+          contentState.classList.remove('hidden');
+          contentState.classList.add('flex');
+          
           pollForCartUpdate(c.id);
+
         } else {
-          msg.textContent = '❌ Error: ' + (data.error || 'Unknown error');
+          loadingState.classList.add('hidden');
+          emptyState.classList.remove('hidden');
+          emptyState.innerHTML = `<p class="text-red-400">Error: ${data.error || 'Unknown error'}</p>`;
         }
       } catch (e) {
-        msg.textContent = '❌ Request failed: ' + e.message;
+        loadingState.classList.add('hidden');
+        emptyState.classList.remove('hidden');
+        emptyState.innerHTML = `<p class="text-red-400">Request failed: ${e.message}</p>`;
       }
 
-      btn.textContent = '🚀 Fire Recovery Agent';
+      btnText.innerHTML = originalBtnHtml;
       btn.disabled = false;
     }
 

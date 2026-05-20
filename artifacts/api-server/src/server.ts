@@ -5,8 +5,13 @@ import path from "path";
 import { db, carts } from "@workspace/db";
 import { desc, eq, sql } from "drizzle-orm";
 import { SimulationRequestSchema } from "@workspace/api-zod";
+import sgMail from "@sendgrid/mail";
 
 dotenv.config({ path: "../../.env" });
+
+if (process.env.SENDGRID_API_KEY) {
+  sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+}
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -175,22 +180,58 @@ app.post("/api/simulate", async (req, res) => {
       strategy = "Discount";
       confidenceScore = 0.94;
       reasoning = `VIP customer with high-value item (${productName}, ₹${cartValue}). Margins allow for VIP treatment. AI suggests a generous 15% discount to guarantee high-value conversion.`;
-      emailCopy = `Dear Valued VIP, we noticed you left the ${productName} in your cart. To ensure you receive the ultimate experience, we'd like to extend an exclusive 15% off your order. Use code: VIP15.`;
+      emailCopy = `Hi there,
+
+As one of our most valued VIP members, we wanted to reach out personally. We noticed that you left the ${productName} in your cart, and we didn't want you to miss out on what is currently one of our highest-rated products this season.
+
+The ${productName} features premium craftsmanship and is designed to deliver an unparalleled experience. Because of your continued loyalty to our brand, we have unlocked a special, one-time offer just for you.
+
+🎁 EXCLUSIVE VIP PERK: Take 15% OFF your entire order today.
+Use code: VIP15 at checkout.
+
+We also offer a 30-day no-questions-asked return policy, so you can shop with absolute confidence. Click the button below to claim your reserved item before your code expires!`;
     } else if (cartValue >= 2000 && (customerType === "Gold" || customerType === "Silver")) {
       strategy = "Social Proof";
       confidenceScore = 0.85;
       reasoning = `High-tier customer with cart value ₹${cartValue}. Product verification indicates high social volume. Selected Social Proof to emphasize quality and community reception.`;
-      emailCopy = `Hello, we noticed you forgot the ${productName} in your cart. Don't take our word for it—see why over 4.9/5 stars rate this as their top purchase. Read customer reviews...`;
+      emailCopy = `Hello,
+
+We noticed you were looking at the ${productName}, and we completely understand why it caught your eye! 
+
+This particular item has been trending heavily this week. Don't just take our word for it—over 4,000 customers have rated this a stellar 4.9 out of 5 stars. 
+
+⭐⭐⭐⭐⭐ "Absolutely incredible quality. I was hesitant at first, but it has completely exceeded my expectations. Worth every penny!" - Verified Buyer
+
+The ${productName} is known for its durability, stunning design, and exceptional utility. Our community loves it, and we are confident you will too. 
+
+Your cart is securely saved. Head back to checkout now to finalize your order and see what all the hype is about!`;
     } else if (cartValue < 1000) {
       strategy = "Reminder";
       confidenceScore = 0.75;
       reasoning = `Low-value cart (₹${cartValue}). Discount strategy is not cost-effective. AI selected standard Reminder strategy to preserve margins.`;
-      emailCopy = `Hi, we saved the items in your shopping cart. Click here to resume your checkout of the ${productName} before you forget!`;
+      emailCopy = `Hi there,
+
+Life gets busy, and it looks like you might have accidentally left something behind! We've securely saved the ${productName} in your shopping cart so you don't have to go searching for it again.
+
+Why choose the ${productName}?
+✓ Premium quality materials
+✓ Designed for everyday excellence
+✓ Backed by our satisfaction guarantee
+
+We're holding your cart for the next 24 hours. Whenever you're ready, simply click the link below to pick up exactly where you left off. If you have any questions about the product, our support team is standing by to help!`;
     } else {
       strategy = "Scarcity";
       confidenceScore = 0.80;
       reasoning = `Mid-value cart (₹${cartValue}) and customer type is ${customerType}. Stock levels for ${productName} are low. urgency selected to prompt immediate checkout.`;
-      emailCopy = `Hi there, the ${productName} in your cart is selling fast! We can only hold it for a limited time due to high demand. Complete checkout now to lock in yours.`;
+      emailCopy = `Hi there,
+
+We're reaching out with an important inventory alert regarding your recent visit.
+
+The ${productName} you added to your cart has been selling significantly faster than anticipated, and we are currently down to our last few units in the warehouse. 
+
+Due to high demand, we can only guarantee your reservation for the next 60 minutes. Once these are gone, we cannot confirm when the next restock will arrive. 
+
+If you're still deciding, now is the time to act! Secure your ${productName} today and enjoy fast shipping directly to your door. Don't let someone else snatch it from your cart!`;
     }
 
     // Save simulation to the database as a "Pending" intervention
@@ -201,18 +242,36 @@ app.post("/api/simulate", async (req, res) => {
       customerTier: customerType,
       frictionPoint: "Price",
       strategy,
-      status: "Pending",
+      status: "Sent",
       confidenceScore,
       agentLog: reasoning,
       emailCopy,
     }).returning();
+
+    let emailSent = false;
+    try {
+      if (process.env.SENDGRID_API_KEY && process.env.SENDER_EMAIL) {
+        await sgMail.send({
+          to: email,
+          from: process.env.SENDER_EMAIL,
+          subject: `Don't lose your ${productName || "cart items"}!`,
+          text: emailCopy,
+        });
+        emailSent = true;
+      } else {
+        console.warn("SendGrid API Key or Sender Email not configured. Skipping actual email send.");
+      }
+    } catch (sendError) {
+      console.error("Failed to send email via SendGrid:", sendError);
+    }
 
     res.json({
       strategy,
       emailCopy,
       confidenceScore,
       reasoning,
-    });
+      emailSent: emailSent
+    } as any);
   } catch (error) {
     console.error("Error in simulator:", error);
     res.status(500).json({ error: "Failed to simulate" });
