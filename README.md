@@ -92,6 +92,23 @@ The AI never decides which strategy to use. Strategy selection is deterministic 
 
 ---
 
+## Screenshots
+Here are some views of the RecoverAI Control Room:
+
+### Dashboard Overview
+![Dashboard Overview](./screenshots/dashboard.png)
+
+### AI Simulator Playground
+![AI Simulator Playground](./screenshots/simulator.png)
+
+### Recovery Attempts
+![Recovery Attempts](./screenshots/attempts.png)
+
+### Agent Decision Logs
+![Agent Decision Logs](./screenshots/agent_logs.png)
+
+---
+
 ## Repository Structure
 
 ```
