@@ -1,7 +1,7 @@
-const { GoogleGenerativeAI } = require('@google/generative-ai');
+const Groq = require('groq-sdk');
 const logger = require('../utils/logger');
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
 async function generateRecoveryEmail(cartData, decision) {
   const discountLine = decision.discount_percent > 0
@@ -39,12 +39,12 @@ Reply ONLY with this JSON:
 `;
 
   try {
-    const model = genAI.getGenerativeModel({ 
-      model: "gemini-2.5-flash",
-      generationConfig: { responseMimeType: "application/json" }
+    const chatCompletion = await groq.chat.completions.create({
+      messages: [{ role: "user", content: prompt }],
+      model: "llama3-8b-8192",
+      response_format: { type: "json_object" }
     });
-    const result = await model.generateContent(prompt);
-    const rawText = result.response.text();
+    const rawText = chatCompletion.choices[0].message.content;
 
     let emailContent;
     try {
@@ -69,7 +69,7 @@ Reply ONLY with this JSON:
     return emailContent;
 
   } catch (geminiError) {
-    logger.warn(`⚠️  Gemini email generation failed (${geminiError.message}). Using template fallback.`);
+    logger.warn(`⚠️  Groq email generation failed (${geminiError.message}). Using template fallback.`);
     return buildFallbackEmail(cartData, decision);
   }
 }

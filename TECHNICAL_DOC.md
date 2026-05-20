@@ -13,8 +13,10 @@ RecoverAI is built on a Node.js (Express) backend, utilizing Shopify Webhooks, S
 ## AI vs. Deterministic Boundaries
 A critical design decision was drawing a strict line between what the LLM handles and what code handles:
 
-*   **Deterministic (`cartAnalyzer.js`):** Math, currency, cart value tiering, user type (new/returning), and discount ceiling logic. *Why? LLMs are notoriously unreliable with exact math and business rules. A hallucinated discount ruins merchant trust.*
-*   **AI Generative (`messageGenerator.js`):** Tone, phrasing, contextualizing the product category (e.g., referencing "apparel" fit vs "electronics" specs), and crafting a human-sounding email. *Why? Deterministic templates feel robotic. The AI excels at synthesizing facts into a warm, contextual message.*
+*   **Deterministic (`cartAnalyzer.js`):** Strategy elimination (never repeat failed strategy), cart value thresholds (above ₹5000 = avoid immediate discount), and customer type rules (returning vs new). *Why? LLMs are notoriously unreliable with exact math and business rules. A hallucinated discount ruins merchant trust.*
+*   **AI Generative (`agentDecision.js` & `messageGenerator.js`):** Reasoning about WHY a strategy failed, predicting the most likely friction point, and writing the personalized message. *Why? Deterministic templates feel robotic. The AI excels at synthesizing facts into a warm, contextual message.*
+
+*This boundary ensures the agent never makes logically invalid decisions while still being flexible in communication.*
 
 ## Failure Handling & Graceful Degradation
 RecoverAI is designed to fail gracefully across several potential points of failure:

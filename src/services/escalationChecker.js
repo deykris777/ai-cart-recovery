@@ -1,14 +1,9 @@
 const cron = require('node-cron');
-const { getCartsForEscalation, getCartAttempts, updateCartStatus } = require('../db/queries');
+const { getCartsForEscalation, getCartAttempts, updateCartStatus, getHistoricalStats, saveRecoveryAttempt } = require('../db/queries');
 const { generateRecoveryEmail } = require('./messageGenerator');
 const { sendRecoveryEmail } = require('./emailService');
-const { saveRecoveryAttempt } = require('../db/queries');
+const { getStrategyForAttempt } = require('../utils/strategyEngine');
 const logger = require('../utils/logger');
-// Escalation schedule:
-// Attempt 1: Sent immediately (by agentDecision.js)
-// Attempt 2: 24 hours later → social_proof
-// Attempt 3: 48 hours later → discount (if not converted)
-// After 3 attempts → mark as lost
 
 function startEscalationChecker() {
   // Run every 30 minutes
@@ -42,12 +37,12 @@ async function checkAndEscalate() {
 
       // Attempt 2: after 24 hours
       if (attempts.length === 1 && hoursSinceLast >= 24) {
-        await escalate(cart, 2, 'social_proof', 0);
+        await escalate(cart, 2);
       }
 
       // Attempt 3: after 48 hours total
       if (attempts.length === 2 && hoursSinceLast >= 24) {
-        await escalate(cart, 3, 'discount', 10);
+        await escalate(cart, 3);
       }
 
       // Give up after 3 attempts
@@ -61,15 +56,31 @@ async function checkAndEscalate() {
   }
 }
 
-async function escalate(cart, attemptNumber, messageType, discountPercent) {
+async function escalate(cart, attemptNumber) {
   try {
-    logger.info(`📈 Escalating cart ${cart.id} → Attempt ${attemptNumber} (${messageType})`);
+    // Dynamic import to prevent any potential circular dependency issues
+    const { getGeminiDecisionMetadata } = require('./agentDecision');
+
+    const strategy = getStrategyForAttempt(cart.user_type, cart.cart_value, attemptNumber);
+    if (!strategy) {
+      logger.info(`🛑 No strategy defined for Attempt ${attemptNumber}. Marking cart ${cart.id} as lost.`);
+      await updateCartStatus(cart.shopify_checkout_id, 'lost');
+      return;
+    }
+
+    const { message_type, discount_percent } = strategy;
+    logger.info(`📈 Escalating cart ${cart.id} → Attempt ${attemptNumber} (${message_type})`);
+
+    const stats = await getHistoricalStats(cart.user_type);
+    const metadata = await getGeminiDecisionMetadata(cart, stats, attemptNumber, message_type, discount_percent);
 
     const decision = {
-      message_type: messageType,
-      discount_percent: discountPercent,
-      tone: cart.cart_value >= 3000 ? 'premium' : 'friendly',
-      reasoning: `Attempt ${attemptNumber}: escalating to ${messageType} after no conversion`
+      message_type,
+      discount_percent,
+      tone: metadata.tone || (cart.cart_value >= 3000 ? 'premium' : 'friendly'),
+      confidence: metadata.confidence ?? 0.85,
+      risk: metadata.risk || 'low',
+      reasoning: metadata.reasoning || `Escalation attempt ${attemptNumber}: ${message_type}`
     };
 
     const emailContent = await generateRecoveryEmail(cart, decision);
@@ -78,12 +89,14 @@ async function escalate(cart, attemptNumber, messageType, discountPercent) {
     await saveRecoveryAttempt({
       cart_id: cart.id,
       attempt_number: attemptNumber,
-      message_type: messageType,
-      discount_percent: discountPercent,
+      message_type: decision.message_type,
+      discount_percent: decision.discount_percent,
       agent_reasoning: decision.reasoning,
       email_subject: emailContent.subject,
       email_body: emailContent.body,
       delay_hours_used: 24,
+      confidence: decision.confidence,
+      risk: decision.risk,
       cart_value: cart.cart_value,
       user_type: cart.user_type,
       customer_email: cart.customer_email

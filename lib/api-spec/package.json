@@ -1,0 +1,6 @@
+{
+  "name": "@workspace/api-spec",
+  "version": "1.0.0",
+  "private": true,
+  "main": "openapi.yaml"
+}

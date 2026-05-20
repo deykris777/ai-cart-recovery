@@ -6,59 +6,93 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>RecoverAI — Agent Dashboard</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: ["class"],
+      theme: {
+        extend: {
+          colors: {
+            border: "hsl(var(--border))",
+            input: "hsl(var(--input))",
+            ring: "hsl(var(--ring))",
+            background: "hsl(var(--background))",
+            foreground: "hsl(var(--foreground))",
+            primary: { DEFAULT: "hsl(var(--primary))", foreground: "hsl(var(--primary-foreground))" },
+            secondary: { DEFAULT: "hsl(var(--secondary))", foreground: "hsl(var(--secondary-foreground))" },
+            destructive: { DEFAULT: "hsl(var(--destructive))", foreground: "hsl(var(--destructive-foreground))" },
+            muted: { DEFAULT: "hsl(var(--muted))", foreground: "hsl(var(--muted-foreground))" },
+            accent: { DEFAULT: "hsl(var(--accent))", foreground: "hsl(var(--accent-foreground))" },
+            popover: { DEFAULT: "hsl(var(--popover))", foreground: "hsl(var(--popover-foreground))" },
+            card: { DEFAULT: "hsl(var(--card))", foreground: "hsl(var(--card-foreground))" },
+          },
+          borderRadius: {
+            lg: "var(--radius)",
+            md: "calc(var(--radius) - 2px)",
+            sm: "calc(var(--radius) - 4px)",
+          }
+        }
+      }
+    }
+  </script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      font-family: 'Outfit', sans-serif;
+      font-family: 'Inter', sans-serif;
+      --background: 240 10% 3.9%;
+      --foreground: 0 0% 98%;
+      --card: 240 10% 3.9%;
+      --card-foreground: 0 0% 98%;
+      --popover: 240 10% 3.9%;
+      --popover-foreground: 0 0% 98%;
+      --primary: 0 0% 98%;
+      --primary-foreground: 240 5.9% 10%;
+      --secondary: 240 3.7% 15.9%;
+      --secondary-foreground: 0 0% 98%;
+      --muted: 240 3.7% 15.9%;
+      --muted-foreground: 240 5% 64.9%;
+      --accent: 240 3.7% 15.9%;
+      --accent-foreground: 0 0% 98%;
+      --destructive: 0 62.8% 30.6%;
+      --destructive-foreground: 0 0% 98%;
+      --border: 240 3.7% 15.9%;
+      --input: 240 3.7% 15.9%;
+      --ring: 240 4.9% 83.9%;
+      --radius: 0.75rem;
     }
 
     body {
-      background-color: #0b0c10;
-      background-image:
-        radial-gradient(at 0% 0%, hsla(253, 16%, 7%, 1) 0, transparent 50%),
-        radial-gradient(at 50% 0%, hsla(225, 39%, 30%, 0.1) 0, transparent 50%),
-        radial-gradient(at 100% 0%, hsla(339, 49%, 30%, 0.1) 0, transparent 50%);
-      background-attachment: fixed;
-      color: #e2e8f0;
+      background-color: hsl(var(--background));
+      color: hsl(var(--foreground));
       min-height: 100vh;
     }
 
-    /* Glassmorphism Cards */
+    /* Shadcn Cards */
     .glass-card {
-      background: rgba(255, 255, 255, 0.03);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.05);
-      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-      transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
-    }
-
-    .glass-card:hover {
-      transform: translateY(-2px);
-      border-color: rgba(255, 255, 255, 0.1);
-      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+      background-color: hsl(var(--card));
+      color: hsl(var(--card-foreground));
+      border: 1px solid hsl(var(--border));
+      box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
     }
 
     /* Simulator panel — matches glass-card visually */
     .sim-panel {
-      background: #1e1e2e;
-      border: 1px solid #2d2d3f;
-      border-radius: 12px;
+      background-color: hsl(var(--card));
+      border: 1px solid hsl(var(--border));
+      border-radius: var(--radius);
     }
 
     /* Agent log entry card */
     .log-card {
-      background: #1e1e2e;
-      border: 1px solid #2d2d3f;
-      border-radius: 12px;
+      background-color: hsl(var(--card));
+      border: 1px solid hsl(var(--border));
+      border-radius: var(--radius);
     }
 
     /* Gradients */
     .text-gradient {
-      background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+      color: hsl(var(--foreground));
+      font-weight: 700;
     }
 
     /* Animations */
@@ -87,9 +121,8 @@
 
     /* Reasoning block */
     .reasoning-block {
-      background: #12121a;
-      border-left: 3px solid #7c3aed;
-      border-radius: 0 8px 8px 0;
+      border-left: 2px solid hsl(var(--border));
+      background-color: hsl(var(--muted) / 0.5);
     }
 
     /* Scrollbar */
@@ -111,63 +144,59 @@
     }
 
     .reasoning-log-item {
-      border-left: 2px solid #4facfe;
-      background: rgba(79, 172, 254, 0.05);
+      border-left: 2px solid hsl(var(--border));
+      background-color: hsl(var(--muted) / 0.5);
       transition: all 0.3s ease;
     }
 
     .reasoning-log-item:hover {
-      background: rgba(79, 172, 254, 0.1);
+      background-color: hsl(var(--muted));
     }
 
     /* Form inputs & selects */
     .sim-input {
       width: 100%;
-      padding: 10px 12px;
-      background: #12121a;
-      border: 1px solid #333;
-      border-radius: 8px;
-      color: #fff;
-      font-size: 1rem;
-      font-family: 'Outfit', sans-serif;
+      padding: 8px 12px;
+      background-color: transparent;
+      border: 1px solid hsl(var(--input));
+      border-radius: calc(var(--radius) - 2px);
+      color: hsl(var(--foreground));
+      font-size: 0.875rem;
+      font-family: 'Inter', sans-serif;
       box-sizing: border-box;
-      min-height: 44px;
-      outline: none;
-      transition: border-color 0.2s;
+      min-height: 40px;
+      outline: 2px solid transparent;
+      outline-offset: 2px;
+      transition: outline-color 0.2s, outline-offset 0.2s, border-color 0.2s;
     }
 
     .sim-input:focus {
-      border-color: #7c3aed;
+      outline-color: hsl(var(--ring));
+      outline-offset: 2px;
+      border-color: hsl(var(--input));
     }
 
     /* Fire button */
     .fire-btn {
       width: 100%;
-      padding: 14px;
-      background: linear-gradient(135deg, #7c3aed, #4f46e5);
+      padding: 10px 16px;
+      background-color: hsl(var(--primary));
       border: none;
-      border-radius: 8px;
-      color: #fff;
-      font-size: 1rem;
-      font-weight: 700;
-      font-family: 'Outfit', sans-serif;
+      border-radius: calc(var(--radius) - 2px);
+      color: hsl(var(--primary-foreground));
+      font-size: 0.875rem;
+      font-weight: 500;
+      font-family: 'Inter', sans-serif;
       cursor: pointer;
-      transition: opacity 0.2s, transform 0.15s;
-      min-height: 44px;
+      transition: background-color 0.2s;
+      min-height: 40px;
     }
 
-    .fire-btn:hover {
-      opacity: 0.85;
-    }
+    .fire-btn:hover { background-color: hsl(var(--primary) / 0.9); }
 
-    .fire-btn:active {
-      transform: scale(0.98);
-    }
+    .fire-btn:active { transform: scale(0.98); }
 
-    .fire-btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
+    .fire-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
     /* Type badge colours */
     .badge-discount {
@@ -207,6 +236,134 @@
     .risk-high {
       color: #f87171;
     }
+
+    /* --- NEW FEATURES CSS --- */
+    .friction-badge {
+      background: #1e3a5f;
+      color: #60a5fa;
+      font-size: 0.75rem;
+      padding: 4px 10px;
+      border-radius: 20px;
+      display: inline-block;
+    }
+    
+    .tier-dot {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-right: 6px;
+      cursor: help;
+    }
+    .tier-low { background: #22c55e; }
+    .tier-medium { background: #eab308; }
+    .tier-high { background: #ef4444; }
+
+    .attempt-blocks {
+      display: flex;
+      gap: 3px;
+      margin-top: 4px;
+    }
+    .attempt-block {
+      width: 20px;
+      height: 4px;
+      border-radius: 2px;
+      background: #333;
+    }
+    .attempt-block.completed {
+      background: #7c3aed;
+    }
+    .attempt-block.converted {
+      background: #22c55e;
+    }
+
+    .confidence-bar-container {
+      background: #1a1a1a;
+      border-radius: 4px;
+      height: 6px;
+      width: 120px;
+      overflow: hidden;
+      display: inline-block;
+      vertical-align: middle;
+      margin-left: 8px;
+    }
+    .confidence-bar-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.6s ease;
+    }
+    .confidence-high { background: #22c55e; }
+    .confidence-medium { background: #eab308; }
+    .confidence-low { background: #ef4444; }
+
+    .strategy-badge {
+      position: relative;
+      cursor: help;
+      display: inline-block;
+    }
+    .strategy-tooltip {
+      display: none;
+      position: absolute;
+      bottom: calc(100% + 8px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 8px;
+      padding: 8px 12px;
+      width: 220px;
+      font-size: 11px;
+      color: #aaa;
+      line-height: 1.5;
+      z-index: 100;
+      pointer-events: none;
+      white-space: normal;
+      text-align: left;
+    }
+    .strategy-badge:hover .strategy-tooltip {
+      display: block;
+    }
+
+    .timeline-row {
+      display: none;
+      background-color: hsl(var(--background) / 0.5);
+      border-top: 1px solid hsl(var(--border));
+    }
+    .timeline-row.expanded {
+      display: table-row;
+    }
+    .timeline-step {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 0;
+      border-left: 2px solid hsl(var(--border));
+      padding-left: 16px;
+      margin-left: 8px;
+      position: relative;
+    }
+    .timeline-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      position: absolute;
+      left: -6px;
+      background: #7c3aed;
+    }
+    .timeline-dot.converted {
+      background: #22c55e;
+    }
+    .timeline-dot.failed {
+      background: #ef4444;
+    }
+    .timeline-dot.pending {
+      background: #eab308;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      * { transition: none !important; animation: none !important; }
+    }
+    /* ------------------------ */
   </style>
 </head>
 
@@ -220,25 +377,25 @@
       class="glass-card rounded-2xl p-4 sm:p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4">
       <div>
         <h1 class="text-3xl sm:text-4xl font-bold tracking-tight text-gradient mb-1">RecoverAI</h1>
-        <p class="text-slate-400 font-light text-sm sm:text-base">Autonomous Agentic Checkout Recovery</p>
+        <p class="text-muted-foreground font-light text-sm sm:text-base">Autonomous Agentic Checkout Recovery</p>
       </div>
       <div
-        class="flex items-center gap-3 bg-slate-900/50 px-4 py-2 rounded-full border border-slate-700/50 self-start sm:self-auto">
+        class="flex items-center gap-3 bg-muted px-4 py-2 rounded-full border border-border self-start sm:self-auto">
         <div class="w-2.5 h-2.5 rounded-full bg-blue-400 live-dot"></div>
         <span class="text-blue-300 text-sm font-medium tracking-wide">Agent Listening</span>
       </div>
     </header>
 
     <!-- ── STAT CARDS ─────────────────────────────────────────────────── -->
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-6">
 
       <div class="glass-card rounded-2xl p-4 sm:p-6">
-        <p class="text-slate-400 text-[10px] sm:text-xs font-medium mb-2 uppercase tracking-wider">Carts Abandoned</p>
+        <p class="text-muted-foreground text-[10px] sm:text-xs font-medium mb-2 uppercase tracking-wider">Carts Abandoned</p>
         <p class="text-2xl sm:text-3xl md:text-4xl font-bold text-white" id="total-carts">—</p>
       </div>
 
       <div class="glass-card rounded-2xl p-4 sm:p-6">
-        <p class="text-slate-400 text-[10px] sm:text-xs font-medium mb-2 uppercase tracking-wider">Recovery Attempts</p>
+        <p class="text-muted-foreground text-[10px] sm:text-xs font-medium mb-2 uppercase tracking-wider">Recovery Attempts</p>
         <p class="text-2xl sm:text-3xl md:text-4xl font-bold text-white" id="total-attempts">—</p>
       </div>
 
@@ -246,7 +403,7 @@
         <div
           class="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity">
         </div>
-        <p class="text-slate-400 text-[10px] sm:text-xs font-medium mb-2 uppercase tracking-wider relative z-10">
+        <p class="text-muted-foreground text-[10px] sm:text-xs font-medium mb-2 uppercase tracking-wider relative z-10">
           Converted</p>
         <p class="text-2xl sm:text-3xl md:text-4xl font-bold text-gradient relative z-10" id="total-converted">—</p>
       </div>
@@ -255,9 +412,23 @@
         <div
           class="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity">
         </div>
-        <p class="text-slate-400 text-[10px] sm:text-xs font-medium mb-2 uppercase tracking-wider relative z-10">
+        <p class="text-muted-foreground text-[10px] sm:text-xs font-medium mb-2 uppercase tracking-wider relative z-10">
           Recovery Rate</p>
         <p class="text-2xl sm:text-3xl md:text-4xl font-bold text-gradient relative z-10" id="recovery-rate">—</p>
+      </div>
+
+
+      <div class="glass-card rounded-2xl p-4 sm:p-6 relative overflow-hidden group" style="box-shadow: 0 0 20px rgba(34, 197, 94, 0.1); border-color: rgba(34, 197, 94, 0.2);">
+        <div class="absolute inset-0 bg-gradient-to-br from-green-500/10 to-emerald-500/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+        <p class="text-muted-foreground text-[10px] sm:text-xs font-medium mb-2 uppercase tracking-wider relative z-10 flex items-center gap-1">💰 Revenue Recovered</p>
+        <p class="text-2xl sm:text-3xl md:text-4xl font-bold text-green-400 relative z-10" id="total-revenue-recovered">—</p>
+      </div>
+
+      <div class="glass-card rounded-2xl p-4 sm:p-6 relative overflow-hidden group">
+        <div class="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-indigo-500/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+        <p class="text-muted-foreground text-[10px] sm:text-xs font-medium mb-1 uppercase tracking-wider relative z-10 flex items-center gap-1">🛡️ Margin Protected</p>
+        <p class="text-lg sm:text-xl font-bold text-blue-400 relative z-10" id="margin-protected-value">—</p>
+        <p class="text-xs text-muted-foreground mt-1 relative z-10" id="margin-protected-sub">We avoided unnecessary discounts on 0 carts</p>
       </div>
 
     </div>
@@ -267,7 +438,7 @@
 
       <div class="lg:col-span-2 glass-card rounded-2xl p-4 sm:p-6">
         <div class="flex justify-between items-center mb-6">
-          <h2 class="text-base sm:text-lg font-semibold text-slate-200">Conversion by Strategy</h2>
+          <h2 class="text-base sm:text-lg font-semibold text-foreground">Conversion by Strategy</h2>
         </div>
         <div class="h-[220px] sm:h-[280px] lg:h-[300px] w-full relative">
           <canvas id="conversionChart"></canvas>
@@ -279,18 +450,42 @@
           <svg class="w-5 h-5 text-blue-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
           </svg>
-          <h2 class="text-base sm:text-lg font-semibold text-slate-200">Live Agent Reasoning</h2>
+          <h2 class="text-base sm:text-lg font-semibold text-foreground">Live Agent Reasoning</h2>
         </div>
         <div id="reasoning-log" class="flex-1 space-y-3 overflow-y-auto pr-1 max-h-[280px] lg:max-h-[300px]">
-          <div class="text-slate-500 text-sm italic text-center mt-10">Waiting for agent activity...</div>
+          <div class="text-muted-foreground text-sm italic text-center mt-10">Waiting for agent activity...</div>
         </div>
       </div>
 
     </div>
 
+
+    <!-- ── STRATEGY PERFORMANCE ───────────────────────────────────────── -->
+    <div class="glass-card rounded-2xl p-4 sm:p-6">
+      <h2 class="text-base sm:text-lg font-semibold text-foreground mb-5">Strategy Performance</h2>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="border-b border-border text-muted-foreground text-xs uppercase tracking-wider">
+              <th class="pb-3 font-medium">Strategy</th>
+              <th class="pb-3 font-medium">Times Used</th>
+              <th class="pb-3 font-medium">Converted</th>
+              <th class="pb-3 font-medium">Success Rate</th>
+              <th class="pb-3 font-medium">Avg Cart Value</th>
+            </tr>
+          </thead>
+          <tbody id="strategy-performance-table" class="divide-y divide-border">
+            <tr>
+              <td colspan="5" class="py-6 text-center text-muted-foreground text-sm">Loading data...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
     <!-- ── RECENT INTERVENTIONS ───────────────────────────────────────── -->
     <div class="glass-card rounded-2xl p-4 sm:p-6">
-      <h2 class="text-base sm:text-lg font-semibold text-slate-200 mb-5">Recent Interventions</h2>
+      <h2 class="text-base sm:text-lg font-semibold text-foreground mb-5">Recent Interventions</h2>
 
       <!-- Mobile cards (hidden on md+) -->
       <div id="attempts-cards" class="md:hidden space-y-3"></div>
@@ -299,16 +494,17 @@
       <div class="hidden md:block overflow-x-auto">
         <table class="w-full text-left border-collapse">
           <thead>
-            <tr class="border-b border-slate-800 text-slate-400 text-xs uppercase tracking-wider">
+            <tr class="border-b border-border text-muted-foreground text-xs uppercase tracking-wider">
               <th class="pb-3 font-medium">Customer</th>
               <th class="pb-3 font-medium">Cart Value</th>
+              <th class="pb-3 font-medium">Friction Point</th>
               <th class="pb-3 font-medium">Strategy Chosen</th>
               <th class="pb-3 text-right font-medium">Status</th>
             </tr>
           </thead>
-          <tbody id="attempts-table" class="divide-y divide-slate-800/50">
+          <tbody id="attempts-table" class="divide-y divide-border">
             <tr>
-              <td colspan="4" class="py-6 text-center text-slate-500 text-sm">Loading data...</td>
+              <td colspan="5" class="py-6 text-center text-muted-foreground text-sm">Loading data...</td>
             </tr>
           </tbody>
         </table>
@@ -317,29 +513,29 @@
 
     <!-- ── SIMULATOR ──────────────────────────────────────────────────── -->
     <div>
-      <h2 class="text-xl sm:text-2xl font-bold mb-4 text-slate-100">🧪 Test Recovery Agent</h2>
+      <h2 class="text-xl sm:text-2xl font-bold mb-4 text-foreground">🧪 Test Recovery Agent</h2>
 
       <div class="sim-panel p-4 sm:p-6">
         <!-- 1-col on mobile, 2-col on sm+ -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
           <div>
-            <label class="block text-[0.72rem] text-slate-500 mb-1.5 uppercase tracking-widest">Cart Value (₹)</label>
+            <label class="block text-[0.72rem] text-muted-foreground mb-1.5 uppercase tracking-widest">Cart Value (₹)</label>
             <input id="sim-value" type="number" value="2500" class="sim-input" />
           </div>
 
           <div>
-            <label class="block text-[0.72rem] text-slate-500 mb-1.5 uppercase tracking-widest">Customer Email</label>
+            <label class="block text-[0.72rem] text-muted-foreground mb-1.5 uppercase tracking-widest">Customer Email</label>
             <input id="sim-email" type="email" value="demo@test.com" class="sim-input" />
           </div>
 
           <div>
-            <label class="block text-[0.72rem] text-slate-500 mb-1.5 uppercase tracking-widest">Product Name</label>
+            <label class="block text-[0.72rem] text-muted-foreground mb-1.5 uppercase tracking-widest">Product Name</label>
             <input id="sim-product" type="text" value="Nike Air Max 270" class="sim-input" />
           </div>
 
           <div>
-            <label class="block text-[0.72rem] text-slate-500 mb-1.5 uppercase tracking-widest">Customer Type</label>
+            <label class="block text-[0.72rem] text-muted-foreground mb-1.5 uppercase tracking-widest">Customer Type</label>
             <select id="sim-type" class="sim-input">
               <option value="new">New Customer</option>
               <option value="returning">Returning Customer</option>
@@ -356,7 +552,7 @@
           <!-- Result box (hidden until triggered) -->
           <div id="sim-result" class="sm:col-span-2 hidden p-4 rounded-lg"
             style="background:#0d1117; border-left:4px solid #7c3aed;">
-            <p id="sim-result-text" class="text-sm text-slate-400 m-0"></p>
+            <p id="sim-result-text" class="text-sm text-muted-foreground m-0"></p>
           </div>
 
         </div>
@@ -365,15 +561,15 @@
 
     <!-- ── AGENT REASONING LOG ────────────────────────────────────────── -->
     <div class="pb-16 sm:pb-20">
-      <h2 class="text-xl sm:text-2xl font-bold mb-4 text-slate-100">🤖 Agent Reasoning Log</h2>
+      <h2 class="text-xl sm:text-2xl font-bold mb-4 text-foreground">🤖 Agent Reasoning Log</h2>
 
       <div id="agent-log" class="flex flex-col gap-3">
-        <p class="text-slate-600 text-sm">Loading agent decisions…</p>
+        <p class="text-muted-foreground text-sm">Loading agent decisions…</p>
       </div>
 
       <p class="text-center mt-5 text-xs text-slate-700">
         Auto-refreshes every 15 s &nbsp;·&nbsp;
-        <span id="last-refresh" class="text-slate-600">—</span>
+        <span id="last-refresh" class="text-muted-foreground">—</span>
       </p>
     </div>
 
@@ -383,6 +579,78 @@
   <!-- ─── SCRIPTS (ALL ORIGINAL LOGIC — UNCHANGED) ────────────────────── -->
   <script>
     let chart;
+
+    
+    /* ── Helpers for new features ── */
+    function getFrictionPoint(strategy, reasoning) {
+      if(reasoning) {
+         // Could try to parse reasoning, but we map based on strategy primarily as fallback
+      }
+      switch(strategy) {
+        case 'reminder': return '😴 Just Distracted';
+        case 'discount': return '💸 Price Hesitation';
+        case 'social_proof': return '🤔 Trust Gap';
+        case 'scarcity': return '⏳ Shipping Confusion';
+        default: return '❓ Unknown';
+      }
+    }
+
+    function getTierInfo(value) {
+      if (value < 2000) return { label: 'Low', color: 'low', tip: 'Low value — no discount strategy' };
+      if (value <= 5000) return { label: 'Medium', color: 'medium', tip: 'Medium value — standard sequence' };
+      return { label: 'High', color: 'high', tip: 'High value — margin protected sequence' };
+    }
+
+    function renderCartValue(value) {
+      const tier = getTierInfo(value);
+      return `<span class="tier-dot tier-${tier.color}" title="${tier.tip}"></span>₹${value}`;
+    }
+
+    function renderAttemptBlocks(attemptNumber, maxAttempts = 3, converted = false) {
+      let blocks = '';
+      for (let i = 1; i <= maxAttempts; i++) {
+        if (i < attemptNumber) {
+           blocks += `<div class="attempt-block completed"></div>`;
+        } else if (i === attemptNumber) {
+           if (converted) {
+              blocks += `<div class="attempt-block converted"></div>`;
+           } else {
+              blocks += `<div class="attempt-block completed"></div>`;
+           }
+        } else {
+           blocks += `<div class="attempt-block"></div>`;
+        }
+      }
+      return `<div class="text-xs text-muted-foreground mt-1">Attempt ${attemptNumber} of ${maxAttempts}</div><div class="attempt-blocks">${blocks}</div>`;
+    }
+
+    function getStrategyColor(strategy) {
+      if (strategy === 'reminder') return '#818cf8';
+      if (strategy === 'discount') return '#f87171';
+      if (strategy === 'social_proof') return '#4ade80';
+      if (strategy === 'scarcity') return '#fbbf24';
+      return '#4facfe';
+    }
+
+    function getConfidenceBar(conf) {
+      if (conf == null) return '';
+      const percent = Math.round(conf * 100);
+      let colorClass = 'confidence-low';
+      if (percent > 70) colorClass = 'confidence-high';
+      else if (percent >= 41) colorClass = 'confidence-medium';
+      
+      return `Confidence: <div class="confidence-bar-container"><div class="confidence-bar-fill ${colorClass}" style="width:${percent}%"></div></div> <span class="text-xs ml-1">${percent}%</span>`;
+    }
+
+    function getStrategyTooltip(strategy) {
+      switch(strategy) {
+        case 'reminder': return 'First attempt for returning customers. Tests if customer was simply distracted. Preserves margin.';
+        case 'scarcity': return 'Used when reminder fails. Creates urgency without reducing price. Protects merchant margin.';
+        case 'discount': return 'Last resort only. All other strategies exhausted. Maximum 10% offered.';
+        case 'social_proof': return 'First attempt for new customers. Builds trust before any purchase pressure.';
+        default: return 'Automated recovery strategy.';
+      }
+    }
 
     function getBaseUrl() {
       if (window.location.protocol === 'file:' || 
@@ -402,7 +670,107 @@
         document.getElementById('total-converted').textContent = data.total_converted || 0;
         document.getElementById('recovery-rate').textContent = data.recovery_rate ? `${data.recovery_rate}%` : '0%';
         updateChart(data.by_message_type || {});
+        
+        // Also fetch attempts to calculate new stats (Revenue Recovered, Margin Protected, Performance Table)
+        const attRes = await fetch(getBaseUrl() + '/api/attempts');
+        const attempts = await attRes.json();
+        
+        let totalRevenue = 0;
+        let marginProtected = 0;
+        const perf = {};
+        
+        if (Array.isArray(attempts)) {
+            attempts.forEach(a => {
+                if (a.converted) {
+                    totalRevenue += (a.cart_value || 0);
+                    if (a.message_type !== 'discount') {
+                        marginProtected++;
+                    }
+                }
+                
+                if (!perf[a.message_type]) {
+                    perf[a.message_type] = { used: 0, converted: 0, totalValue: 0 };
+                }
+                perf[a.message_type].used++;
+                perf[a.message_type].totalValue += (a.cart_value || 0);
+                if (a.converted) {
+                    perf[a.message_type].converted++;
+                }
+            });
+        }
+        
+        document.getElementById('total-revenue-recovered').textContent = `₹${totalRevenue.toLocaleString()}`;
+        document.getElementById('margin-protected-value').textContent = `${marginProtected} cart${marginProtected!==1?'s':''} — no discount needed`;
+        document.getElementById('margin-protected-sub').textContent = `We avoided unnecessary discounts on ${marginProtected} carts`;
+        
+        // Render Strategy Performance Table
+        const perfTable = document.getElementById('strategy-performance-table');
+        let bestStrategy = '';
+        let bestRate = -1;
+        
+        const rows = Object.keys(perf).map(strategy => {
+            const stats = perf[strategy];
+            const rate = stats.used > 0 ? (stats.converted / stats.used) * 100 : 0;
+            const avgValue = stats.used > 0 ? Math.round(stats.totalValue / stats.used) : 0;
+            
+            if (rate > bestRate && stats.used > 0) {
+                bestRate = rate;
+                bestStrategy = strategy;
+            }
+            
+            let rateColor = 'text-red-500';
+            if (rate > 10) rateColor = 'text-green-500';
+            else if (rate > 0) rateColor = 'text-yellow-500';
+            
+            return {
+                strategy,
+                used: stats.used,
+                converted: stats.converted,
+                rate,
+                rateColor,
+                avgValue
+            };
+        });
+        
+        if (rows.length > 0) {
+            perfTable.innerHTML = rows.map(r => `
+                <tr class="${r.strategy === bestStrategy ? 'border-l-[3px] border-l-green-500' : ''} hover:bg-white/[0.02] transition-colors">
+                    <td class="py-3 px-2">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-sm inline-block shrink-0" style="background-color: ${getStrategyColor(r.strategy)};"></span>
+                            ${typeBadge(r.strategy)}
+                        </div>
+                    </td>
+                    <td class="py-3 text-sm text-foreground">${r.used}</td>
+                    <td class="py-3 text-sm text-foreground">${r.converted}</td>
+                    <td class="py-3 text-sm font-bold">
+                        <div class="flex items-center gap-2">
+                            <div class="w-16 bg-white/10 h-1.5 rounded-full overflow-hidden">
+                                <div class="h-full rounded-full" style="width: ${r.rate}%; background-color: ${getStrategyColor(r.strategy)};"></div>
+                            </div>
+                            <span class="${r.rateColor} font-mono">${r.rate.toFixed(1)}%</span>
+                        </div>
+                    </td>
+                    <td class="py-3 text-sm text-foreground">₹${r.avgValue.toLocaleString()}</td>
+                </tr>
+            `).join('');
+        } else {
+            perfTable.innerHTML = '<tr><td colspan="5" class="py-6 text-center text-muted-foreground text-sm">No strategy data available</td></tr>';
+        }
+        
       } catch (e) { console.error('Stats load error:', e); }
+    }
+
+    
+    function toggleTimeline(email) {
+      const row = document.getElementById('timeline-' + email.replace(/[^a-zA-Z0-9]/g, ''));
+      if (row) {
+        row.classList.toggle('expanded');
+        const btn = document.getElementById('btn-timeline-' + email.replace(/[^a-zA-Z0-9]/g, ''));
+        if (btn) {
+           btn.innerHTML = row.classList.contains('expanded') ? '▲ Hide Timeline' : '▼ View Timeline';
+        }
+      }
     }
 
     async function loadAttempts() {
@@ -416,63 +784,114 @@
           log.innerHTML = attempts.slice(0, 5).map(a => `
           <div class="reasoning-log-item p-3 rounded-lg">
             <div class="flex justify-between items-start mb-1">
-              <span class="text-slate-400 text-[10px] uppercase tracking-wider">${formatTime(a.sent_at)}</span>
+              <span class="text-muted-foreground text-[10px] uppercase tracking-wider">${formatTime(a.sent_at)}</span>
               <span class="text-[10px] px-2 py-0.5 rounded-full ${a.converted
               ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-              : 'bg-slate-800 text-slate-300 border border-slate-700'}">
+              : 'bg-slate-800 text-foreground border border-border'}">
                 ${a.converted ? 'Converted' : a.message_type}
               </span>
             </div>
-            <p class="text-slate-200 text-sm font-medium mb-1">₹${a.cart_value} | ${a.user_type}</p>
-            <p class="text-slate-400 text-xs italic leading-relaxed">"${a.agent_reasoning}"</p>
+            <p class="text-foreground text-sm font-medium mb-1">₹${a.cart_value} | ${a.user_type}</p>
+            ${a.confidence != null ? `<div class="mb-1">${getConfidenceBar(a.confidence)}</div>` : ''}
+            <p class="text-muted-foreground text-xs italic leading-relaxed">"${a.agent_reasoning}"</p>
           </div>
         `).join('');
         }
 
+        /* Group attempts for timeline */
+        const grouped = {};
+        if (Array.isArray(attempts)) {
+            attempts.forEach(a => {
+                const key = a.customer_email || 'Anonymous';
+                if (!grouped[key]) grouped[key] = [];
+                grouped[key].push(a);
+            });
+        }
+        
+        // We will show the latest attempt per customer in the table
+        const latestAttempts = Object.values(grouped).map(group => {
+            return group.sort((x,y) => new Date(y.sent_at) - new Date(x.sent_at))[0];
+        }).sort((x,y) => new Date(y.sent_at) - new Date(x.sent_at));
+
         /* Desktop table */
         const table = document.getElementById('attempts-table');
-        if (Array.isArray(attempts) && attempts.length > 0) {
-          table.innerHTML = attempts.map(a => `
+        if (latestAttempts.length > 0) {
+          table.innerHTML = latestAttempts.map(a => {
+            const safeEmailId = (a.customer_email || 'Anonymous').replace(/[^a-zA-Z0-9]/g, '');
+            const timelineHtml = grouped[a.customer_email || 'Anonymous'].sort((x,y) => x.attempt_number - y.attempt_number).map(t => {
+                let dotClass = 'pending';
+                let outcome = '🕐 Pending';
+                if (t.converted) { dotClass = 'converted'; outcome = '✅ Converted! → ₹' + t.cart_value; }
+                else if (t.attempt_number >= 3 && !t.converted) { dotClass = 'failed'; outcome = '❌ Failed'; }
+                else { dotClass = 'failed'; outcome = '❌ No conversion'; }
+                
+                return `<div class="timeline-step">
+                    <div class="timeline-dot ${dotClass}"></div>
+                    <div class="timeline-content">
+                        <span class="text-xs font-bold text-foreground">[Attempt ${t.attempt_number}] → ${t.message_type}</span>
+                        <span class="text-xs text-muted-foreground italic">"${(t.agent_reasoning || '').substring(0, 80)}..."</span>
+                        <span class="text-[10px] text-muted-foreground">${formatTime(t.sent_at)}</span>
+                        <span class="text-xs ${t.converted ? 'text-green-400' : 'text-red-400'}">${outcome}</span>
+                    </div>
+                </div>`;
+            }).join('');
+            
+            return `
           <tr class="hover:bg-white/[0.02] transition-colors">
-            <td class="py-4">
-              <p class="text-sm text-slate-200 font-medium">${a.customer_email || 'Anonymous'}</p>
+            <td class="py-4 align-top">
+              <p class="text-sm text-foreground font-medium">${a.customer_email || 'Anonymous'}</p>
+              ${renderAttemptBlocks(a.attempt_number, 3, a.converted)}
             </td>
-            <td class="py-4 text-sm text-slate-300">₹${a.cart_value}</td>
-            <td class="py-4">
-              <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20">
-                ${a.message_type}
-              </span>
+            <td class="py-4 text-sm text-foreground align-top">${renderCartValue(a.cart_value)}</td>
+            <td class="py-4 align-top">
+                <span class="friction-badge">${getFrictionPoint(a.message_type, a.agent_reasoning)}</span>
             </td>
-            <td class="py-4 text-right">
-              ${a.converted
-              ? '<span class="inline-flex items-center gap-1 text-emerald-400 text-sm font-medium"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> Converted</span>'
-              : '<span class="inline-flex items-center gap-1 text-blue-400 text-sm">✉️ Sent</span>'}
+            <td class="py-4 align-top">
+              ${typeBadge(a.message_type)}
+            </td>
+            <td class="py-4 text-right align-top">
+              <div class="flex flex-col items-end gap-2">
+                ${a.converted
+                ? '<span class="inline-flex items-center gap-1 text-emerald-400 text-sm font-medium"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> Converted</span>'
+                : '<span class="inline-flex items-center gap-1 text-blue-400 text-sm">✉️ Sent</span>'}
+                <button id="btn-timeline-${safeEmailId}" onclick="toggleTimeline('${a.customer_email || 'Anonymous'}')" class="text-xs text-purple-400 hover:text-purple-300">▼ View Timeline</button>
+              </div>
             </td>
           </tr>
-        `).join('');
+          <tr id="timeline-${safeEmailId}" class="timeline-row">
+            <td colspan="5">
+                <div class="flex flex-col py-2 px-4 gap-2">
+                    <h3 class="text-sm font-semibold text-foreground mb-2">Recovery Timeline</h3>
+                    ${timelineHtml}
+                </div>
+            </td>
+          </tr>
+        `}).join('');
         }
 
         /* Mobile cards */
         const cards = document.getElementById('attempts-cards');
-        if (Array.isArray(attempts) && attempts.length > 0) {
-          cards.innerHTML = attempts.map(a => `
-          <div class="rounded-xl p-4 border border-slate-800 bg-white/[0.02] space-y-2">
+        if (latestAttempts.length > 0) {
+          cards.innerHTML = latestAttempts.map(a => `
+          <div class="rounded-xl p-4 border border-border bg-white/[0.02] space-y-2">
             <div class="flex items-start justify-between gap-2 flex-wrap">
-              <p class="text-sm text-slate-200 font-medium break-all">${a.customer_email || 'Anonymous'}</p>
+              <div>
+                  <p class="text-sm text-foreground font-medium break-all">${a.customer_email || 'Anonymous'}</p>
+                  ${renderAttemptBlocks(a.attempt_number, 3, a.converted)}
+              </div>
               ${a.converted
               ? '<span class="inline-flex items-center gap-1 text-emerald-400 text-xs font-medium shrink-0"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Converted</span>'
               : '<span class="text-blue-400 text-xs shrink-0">✉️ Sent</span>'}
             </div>
-            <div class="flex items-center gap-3 flex-wrap">
-              <span class="text-slate-400 text-xs">₹${a.cart_value}</span>
-              <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20">
-                ${a.message_type}
-              </span>
+            <div class="flex items-center gap-3 flex-wrap mt-2">
+              <span class="text-muted-foreground text-xs">${renderCartValue(a.cart_value)}</span>
+              <span class="friction-badge">${getFrictionPoint(a.message_type, a.agent_reasoning)}</span>
+              ${typeBadge(a.message_type)}
             </div>
           </div>
         `).join('');
         } else {
-          cards.innerHTML = '<p class="text-slate-600 text-sm text-center py-4">No interventions yet.</p>';
+          cards.innerHTML = '<p class="text-muted-foreground text-sm text-center py-4">No interventions yet.</p>';
         }
 
       } catch (e) { console.error('Attempts load error:', e); }
@@ -485,17 +904,24 @@
       const values = labels.map(k => merged[k]);
       if (chart) chart.destroy();
       const ctx = document.getElementById('conversionChart').getContext('2d');
-      const gradient = ctx.createLinearGradient(0, 0, 0, 400);
-      gradient.addColorStop(0, 'rgba(79,172,254,0.8)');
-      gradient.addColorStop(1, 'rgba(79,172,254,0.1)');
+      
+      const colors = labels.map(k => getStrategyColor(k));
+      const hoverColors = labels.map(k => {
+        if (k === 'reminder') return '#a5b4fc';
+        if (k === 'discount') return '#fca5a5';
+        if (k === 'social_proof') return '#86efac';
+        if (k === 'scarcity') return '#fde047';
+        return '#00f2fe';
+      });
+
       chart = new Chart(ctx, {
         type: 'bar',
         data: {
-          labels,
+          labels: labels.map(k => k.replace('_', ' ').replace(/\b\w/g, c => c.toUpperCase())),
           datasets: [{
             label: 'Conversions', data: values,
-            backgroundColor: gradient, borderColor: '#4facfe',
-            borderWidth: 1, borderRadius: 6, hoverBackgroundColor: '#00f2fe'
+            backgroundColor: colors, borderColor: colors,
+            borderWidth: 1, borderRadius: 6, hoverBackgroundColor: hoverColors
           }]
         },
         options: {
@@ -595,7 +1021,7 @@
             `Tier: <strong>${c.value_tier}</strong> &nbsp;|&nbsp; ` +
             `Category: <strong>${c.product_category}</strong> &nbsp;|&nbsp; ` +
             `Customer: <strong>${c.user_type}</strong><br>` +
-            `<span class="text-slate-500 text-xs">Check the reasoning log below — it will update as soon as the agent decides (~5-15 s).</span>`;
+            `<span class="text-muted-foreground text-xs">Check the reasoning log below — it will update as soon as the agent decides (~5-15 s).</span>`;
           pollForCartUpdate(c.id);
         } else {
           msg.textContent = '❌ Error: ' + (data.error || 'Unknown error');
@@ -619,7 +1045,8 @@
 
     function typeBadge(type) {
       const cls = TYPE_CLASS[type] || 'badge-default';
-      return `<span class="${cls}" style="font-size:.75rem;padding:4px 10px;border-radius:20px;display:inline-block;">${type}</span>`;
+      const tip = getStrategyTooltip(type);
+      return `<div class="strategy-badge"><span class="${cls}" style="font-size:.75rem;padding:4px 10px;border-radius:20px;display:inline-block;">${type}</span><div class="strategy-tooltip">${tip}</div></div>`;
     }
 
     function riskDot(risk) {
@@ -643,7 +1070,7 @@
         if (!Array.isArray(log) || log.length === 0) {
           console.warn('🤖 loadAgentLog(): no decisions found or invalid format.');
           container.innerHTML =
-            '<p class="text-slate-600 text-sm">No agent decisions yet. Run a simulation above to see reasoning here.</p>';
+            '<p class="text-muted-foreground text-sm">No agent decisions yet. Run a simulation above to see reasoning here.</p>';
           return;
         }
 
@@ -664,31 +1091,22 @@
                 ? '<span style="font-size:.75rem;background:#14532d;padding:4px 10px;border-radius:20px;color:#4ade80;display:inline-block;">✅ CONVERTED</span>'
                 : ''}
                 </div>
-                <span class="text-slate-600 text-xs whitespace-nowrap">
+                <span class="text-muted-foreground text-xs whitespace-nowrap">
                   ${new Date(entry.sent_at).toLocaleString()}
                 </span>
               </div>
 
               <!-- Email subject -->
-              <p class="text-slate-100 font-semibold text-sm sm:text-[0.95rem] mb-2 leading-snug">
+              <p class="text-foreground font-semibold text-sm sm:text-[0.95rem] mb-2 leading-snug">
                 "${entry.email_subject || 'No subject recorded'}"
               </p>
 
               <!-- Confidence bar -->
-              ${entry.confidence != null ? `
-              <div class="mb-3">
-                <div class="flex justify-between text-xs text-slate-600 mb-1">
-                  <span>Agent Confidence</span>
-                  <span>${Math.round(entry.confidence * 100)}%</span>
-                </div>
-                <div class="w-full h-1.5 rounded bg-slate-800 overflow-hidden">
-                  <div class="conf-bar-fill" style="width:${Math.round(entry.confidence * 100)}%"></div>
-                </div>
-              </div>` : ''}
+              ${entry.confidence != null ? `<div class="mb-3 flex items-center text-sm text-foreground">${getConfidenceBar(entry.confidence)}</div>` : ''}
 
               <!-- Reasoning -->
               <div class="reasoning-block p-3 sm:p-4 mt-2">
-                <p class="text-[10px] text-slate-600 uppercase tracking-widest mb-1">🧠 Agent Reasoning</p>
+                <p class="text-[10px] text-muted-foreground uppercase tracking-widest mb-1">🧠 Agent Reasoning</p>
                 <p class="text-[#c4b5fd] text-sm italic leading-relaxed">
                   "${entry.agent_reasoning || 'No reasoning recorded'}"
                 </p>
@@ -696,9 +1114,9 @@
 
               <!-- Footer meta -->
               <div class="flex flex-wrap gap-3 sm:gap-4 mt-3">
-                <span class="text-xs text-slate-500">💰 ₹${entry.cart_value ?? '?'}</span>
-                <span class="text-xs text-slate-500">👤 ${entry.user_type ?? '?'}</span>
-                <span class="text-xs text-slate-500 break-all">✉️ ${entry.customer_email ?? '?'}</span>
+                <span class="text-xs text-muted-foreground">💰 ₹${entry.cart_value ?? '?'}</span>
+                <span class="text-xs text-muted-foreground">👤 ${entry.user_type ?? '?'}</span>
+                <span class="text-xs text-muted-foreground break-all">✉️ ${entry.customer_email ?? '?'}</span>
                 ${entry.discount_percent > 0
                 ? `<span class="text-xs text-red-400">🏷️ ${entry.discount_percent}% off applied</span>`
                 : ''}

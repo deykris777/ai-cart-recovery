@@ -1,0 +1,248 @@
+openapi: 3.0.3
+info:
+  title: RecoverAI API
+  version: 1.0.0
+  description: Real-time agentic checkout recovery API
+paths:
+  /api/kpis:
+    get:
+      summary: Get core KPI card statistics
+      operationId: getKpis
+      responses:
+        '200':
+          description: KPI data with trend sparklines
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KpiData'
+  /api/chart:
+    get:
+      summary: Get recovery attempts vs converted per strategy
+      operationId: getChartData
+      responses:
+        '200':
+          description: Strategy performance comparison
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/StrategyChartItem'
+  /api/logs:
+    get:
+      summary: Get live agent reasoning logs
+      operationId: getLogs
+      responses:
+        '200':
+          description: Feed of recent agent decisions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AgentLogItem'
+  /api/strategies:
+    get:
+      summary: Get strategy performance table metrics
+      operationId: getStrategies
+      responses:
+        '200':
+          description: Summary stats per strategy
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/StrategyPerformanceItem'
+  /api/interventions:
+    get:
+      summary: Get recent interventions table
+      operationId: getInterventions
+      responses:
+        '200':
+          description: List of checkout recovery attempts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/InterventionItem'
+  /api/simulate:
+    post:
+      summary: Run AI recovery strategy simulation
+      operationId: simulateIntervention
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SimulationRequest'
+      responses:
+        '200':
+          description: Simulation results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimulationResponse'
+
+components:
+  schemas:
+    KpiData:
+      type: object
+      required:
+        - revenueRecovered
+        - revenueRecoveredTrend
+        - recoveryRate
+        - recoveryRateTrend
+        - cartsRecovered
+        - cartsRecoveredTrend
+        - marginProtected
+        - marginProtectedTrend
+      properties:
+        revenueRecovered:
+          type: number
+        revenueRecoveredTrend:
+          type: array
+          items:
+            type: number
+        recoveryRate:
+          type: number
+        recoveryRateTrend:
+          type: array
+          items:
+            type: number
+        cartsRecovered:
+          type: integer
+        cartsRecoveredTrend:
+          type: array
+          items:
+            type: number
+        marginProtected:
+          type: number
+        marginProtectedTrend:
+          type: array
+          items:
+            type: number
+
+    StrategyChartItem:
+      type: object
+      required:
+        - strategy
+        - attempts
+        - converted
+      properties:
+        strategy:
+          type: string
+        attempts:
+          type: integer
+        converted:
+          type: integer
+
+    AgentLogItem:
+      type: object
+      required:
+        - id
+        - timestamp
+        - email
+        - cartValue
+        - strategy
+        - decision
+        - reasoning
+      properties:
+        id:
+          type: string
+        timestamp:
+          type: string
+        email:
+          type: string
+        cartValue:
+          type: number
+        strategy:
+          type: string
+        decision:
+          type: string
+        reasoning:
+          type: string
+
+    StrategyPerformanceItem:
+      type: object
+      required:
+        - name
+        - attempts
+        - successRate
+        - revenueRecovered
+        - marginImpact
+      properties:
+        name:
+          type: string
+        attempts:
+          type: integer
+        successRate:
+          type: number
+        revenueRecovered:
+          type: number
+        marginImpact:
+          type: number
+
+    InterventionItem:
+      type: object
+      required:
+        - id
+        - email
+        - cartValue
+        - tier
+        - frictionPoint
+        - strategy
+        - status
+        - timestamp
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+        cartValue:
+          type: number
+        tier:
+          type: string
+        frictionPoint:
+          type: string
+        strategy:
+          type: string
+        status:
+          type: string
+        timestamp:
+          type: string
+
+    SimulationRequest:
+      type: object
+      required:
+        - cartValue
+        - email
+        - productName
+        - customerType
+      properties:
+        cartValue:
+          type: number
+        email:
+          type: string
+        productName:
+          type: string
+        customerType:
+          type: string
+
+    SimulationResponse:
+      type: object
+      required:
+        - strategy
+        - emailCopy
+        - confidenceScore
+        - reasoning
+      properties:
+        strategy:
+          type: string
+        emailCopy:
+          type: string
+        confidenceScore:
+          type: number
+        reasoning:
+          type: string
