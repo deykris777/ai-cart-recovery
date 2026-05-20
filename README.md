@@ -11,7 +11,7 @@
 |---|---|
 | **GitHub Repository** | https://github.com/deykris777/ai-cart-recovery |
 | **Live Demo (Render)** | https://ai-cart-recovery.onrender.com/ |
-| **Demo Video** | ⚠️ INSERT DEMO VIDEO LINK HERE |
+| **Demo Video** | https://drive.google.com/file/d/1DwcKheXG3Br_U68Nd01O4lHyiA03L7Hw/view?usp=drive_link|
 | **Product Document** | [View PDF](https://drive.google.com/file/d/1V6Xbc0sOSR4hcKWkjc4rXg2diGNEusCV/view?usp=sharing) · [PRODUCT_DOCUMENT.md](./PRODUCT_DOCUMENT.md) |
 | **Technical Document** | [View PDF](https://drive.google.com/file/d/1W7vEQRT-SLeP6ccdQbOGrZH99gRCHW-7/view?usp=sharing) · [TECHNICAL_DOCUMENT.md](./TECHNICAL_DOCUMENT.md) |
 | **Decision Log** | [View PDF](https://drive.google.com/file/d/1hAKOHPlZ4pCazVhSr1y8ktA5D3sGnfxB/view?usp=sharing) · [DECISION_LOG.md](./DECISION_LOG.md) |
