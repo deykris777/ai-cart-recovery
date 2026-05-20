@@ -13,6 +13,10 @@ ngrok.zip
 
 # ─── Scratch / Temporary Work ────────────────────────────────────────────────
 scratch/
+check-attempts.js
+check-db.js
+test-save.js
+test-webhook.js
 
 # ─── Logs ────────────────────────────────────────────────────────────────────
 logs/

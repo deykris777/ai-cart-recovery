@@ -222,7 +222,7 @@ export default function Dashboard() {
           </div>
           <div className="flex items-center justify-between text-[11px] font-mono text-textMuted">
             <span>LLM Engine</span>
-            <span>Gemini Pro</span>
+            <span>Groq LLaMA</span>
           </div>
         </div>
       </aside>
