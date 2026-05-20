@@ -302,13 +302,14 @@ export default function Dashboard() {
       <main className="flex-1 flex flex-col overflow-y-auto bg-background pb-16 lg:pb-0">
         <header className="h-16 border-b border-border flex items-center justify-between px-4 lg:px-8 bg-surface">
           <div className="flex items-center gap-3">
-            <h2 className="text-sm font-semibold tracking-wider uppercase text-textPrimary">
+            <h2 className="text-base lg:text-lg font-bold tracking-wider uppercase text-textPrimary">
               {activeTab === "dashboard" && "Mission Control Overview"}
               {activeTab === "simulator" && "AI Simulator Playground"}
               {activeTab === "interventions" && "All Recovery Attempts"}
               {activeTab === "logs" && "Live Decision Rationale Feed"}
             </h2>
-            <span className="px-2 py-0.5 bg-border rounded text-[10px] font-mono text-textSecondary">
+            <span className="flex items-center gap-1.5 px-2 py-0.5 bg-border rounded text-[10px] font-mono text-textSecondary font-semibold uppercase tracking-wider">
+              <span className="h-1.5 w-1.5 rounded-full bg-accent animate-pulse" />
               Live updates
             </span>
           </div>
