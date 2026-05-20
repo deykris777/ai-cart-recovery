@@ -17,7 +17,7 @@ export default {
         textMuted: "var(--color-text-muted)",
       },
       fontFamily: {
-        sans: ["Geist", "Inter", "system-ui", "sans-serif"],
+        sans: ["sans-serif"],
         mono: ["Geist Mono", "Fira Code", "monospace"],
       },
     },
