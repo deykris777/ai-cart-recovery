@@ -3,7 +3,7 @@ import axios, { AxiosError } from "axios";
 
 // Default axios instance config
 const AXIOS_INSTANCE = axios.create({
-  baseURL: (import.meta as any).env?.VITE_API_URL || "http://localhost:3000",
+  baseURL: (import.meta as any).env?.VITE_API_URL || "",
 });
 
 export interface KpiData {
