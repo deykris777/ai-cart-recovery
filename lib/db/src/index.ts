@@ -1,10 +1,10 @@
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
-import * as schema from "./schema/carts";
+import * as schema from "./schema/carts.js";
 import fs from "fs";
 import path from "path";
 
-export * from "./schema/carts";
+export * from "./schema/carts.js";
 
 const connectionString = process.env.DATABASE_URL;
 
